@@ -1,0 +1,23 @@
+<html>
+    <head>
+        <title>Recupera password</title>
+        <meta charset="utf-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1"/>
+        <link href="../css/bootstrap.min.css" rel="stylesheet"/>
+        <link href="signin.css" rel="stylesheet"/>
+        <script type="text/javascript" lang="javascript" src="../js/bootstrap.min.js">
+		</script>
+        <script type="text/javascript" lang="javascript" src="loginScript.js"></script>
+    </head>
+    <body class="text-center">
+        <form action="login.html" class="form-signin" 
+        method="GET" name="myForm" onSubmit="return passwordDimenticata()"> 
+                   
+            <h1 class="h3 mb-3 font-weight-normal">Inserisci la tua email</h1>
+
+            <input type="email" name="inputEmail" class="form-control" placeholder="Email address" required autofocus/>
+            
+            <button class="btn btn-lg btn-primary btn-block" type="submit">Invia password</button>
+        </form>
+    </body>
+</html>

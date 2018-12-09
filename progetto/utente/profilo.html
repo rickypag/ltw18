@@ -1,0 +1,14 @@
+<html>
+    <head>
+        <title>Profilo</title>
+        <script type="text/javascript" lang="javascript" src="../cookie.js"></script>
+    </head>
+    <body>
+        <h1>Profilo</h1>
+        Benvenuto <script>document.write(localStorage.user)</script>
+        <br>
+        <a href="homepage.html">homepage</a>
+        <br>
+        <a href="../paginaLogin/login.html" onclick="localStorage.removeItem('user')">logout</a>
+    </body>
+</html>
