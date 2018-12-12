@@ -1,0 +1,36 @@
+<html>
+    <head>
+        <title>Homepage</title>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        <link href="../css/index.css" rel="stylesheet"/>
+        <script type="text/javascript" lang="javascript" src="../js/homepage.js"></script>
+    </head>
+    <body>
+        <!--Inserire la navbar-->
+        <div id="next-match">
+            <form class="box-offerta">
+                <div class="nome-partita">Caricamento in corso</div>
+                <a id="chiediPersone" class="button link-offerta" href="#persone">Vedi offerte</a>
+            </form>
+        </div>
+        <form id="nuova-offerta">
+            <label>Inserisci un nuovo evento: </label>
+            <div>
+                <input class="homeTeam-nuova-offerta" type="text" name="homeTeam" />
+                <select class="homeTeam-nuova-offerta" name="homeTeam">
+                </select> - 
+                <input class="awayTeam-nuova-offerta" type="text" name="awayTeam" />
+            </div>
+            <a id="creaOfferta" class="button buttonNuovaOfferta">crea offerta</a>
+        </form>
+        <div id="ospiti-da-accettare">
+            <label>OSPITI DA ACCETTARE</label>
+        </div>
+        <div id="offerte-accettate">
+            <label>OFFERTE ACCETTATE</label>
+        </div>
+        <div id="recensioni-da-fare">
+            <label>RECENSIONI DA FARE</label>
+        </div>
+    </body>
+</html>
