@@ -1,0 +1,109 @@
+.button {
+    padding: 10px 10px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    background-color: rgba(100, 148, 237, 0.616);
+    border: 1px solid black;
+    border-radius: 4px;
+    
+    font-family: Georgia;
+    font-style: italic;
+    font-size: 15px;
+    font-weight: bold;
+}
+
+.button:hover{
+    text-decoration: none;
+    color: whitesmoke;
+    background-color: rgba(100, 148, 237, 0.850);
+}
+
+.button.active{
+    background-color:white;
+}
+
+.bt-ospita{
+    background-image: url(letto.jpg);
+    background-size: 100%;
+    color: blue;
+}
+
+.bt-ospita:hover{
+    color:rgba(0, 0, 255, 0.700);
+}
+
+.form{
+    font-family: Georgia;
+    font-style: italic;
+    font-size: 30px;
+    font-weight: bold;
+
+    background-color: rgba(245, 245, 245, 0.616);
+    text-align: center;
+}
+
+.box-offerta{
+    font-family: Georgia;
+    font-style: italic;
+    font-size: 30px;
+    font-weight: bold;
+
+    width: 400px;
+    margin: 10px auto;
+    padding: 10px;
+    background-color: rgba(245, 245, 245, 0.616);
+    text-align: center;
+}
+
+.div-offerta-da-accettare{
+    font-family: Georgia;
+    font-style: italic;
+    font-size: 30px;
+    font-weight: bold;
+
+    width: 400px;
+    margin: 10px auto;
+    padding: 10px;
+    background-repeat: no-repeat;
+    background-size: 100%;
+    background-color: #cccccc;
+    background-position: center;
+    text-align: center;
+}
+
+.sfondo {
+    background-image: url("imgHome1.jpg");
+    background-color: #cccccc;
+    height: 100%;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    position: relative;
+    background-attachment: fixed;
+    text-align: center;
+  }
+
+.offerta-da-accettare-ospite{
+    background-position: center;
+    font-style: normal;
+    font-size: 18px;
+}
+
+.label{
+    height: 60%;
+    text-align: center;
+    background-color: orange;
+    border: 1px solid black;
+    border-radius: 4px;
+
+    font-size: 40px;
+    font-family: Courier 'Courier New', Courier, monospace;
+    font-weight: bold;
+
+}
+
+/*stelle*/
+.checked {
+    color: orange;
+}

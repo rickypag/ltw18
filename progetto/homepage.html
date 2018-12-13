@@ -1,11 +1,11 @@
 <html>
     <head>
         <title>Homepage</title>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-        <link href="../css/index.css" rel="stylesheet"/>
-        <script type="text/javascript" lang="javascript" src="../js/homepage.js"></script>
+        <link href="homepage.css" rel="stylesheet"/>
     </head>
-    <body>
+    <body class="sfondo">;
         <!--Inserire la navbar-->
         <div id="next-match">
             <form class="box-offerta">
@@ -13,24 +13,58 @@
                 <a id="chiediPersone" class="button link-offerta" href="#persone">Vedi offerte</a>
             </form>
         </div>
-        <form id="nuova-offerta">
+        <form id="nuova-offerta" class="form">
             <label>Inserisci un nuovo evento: </label>
             <div>
-                <input class="homeTeam-nuova-offerta" type="text" name="homeTeam" />
-                <select class="homeTeam-nuova-offerta" name="homeTeam">
-                </select> - 
-                <input class="awayTeam-nuova-offerta" type="text" name="awayTeam" />
+                <select id="selPartitaHome" name="selPartitaHome" class="selPartita home"><option value="null">---</option></select>
+                <select id="selPartitaAway" class="selPartita away"><option value="Napoli">Napoli</option></select>
             </div>
             <a id="creaOfferta" class="button buttonNuovaOfferta">crea offerta</a>
         </form>
+
+
+        <script type="text/javascript" lang="javascript" src="homepage.js"></script>
+
+
         <div id="ospiti-da-accettare">
-            <label>OSPITI DA ACCETTARE</label>
+            <label class="label labOspitiDaAccettare">OSPITI DA ACCETTARE</label>
+        <div class="box-offerta div-offerta-da-accettare">Inter - Napoli
+            <input id="offerta-da-accettare-id" type="hidden" value="offerta._id" >
+            <div class="offerte-da-accettare-ospite">
+                <div class="offerta-da-accettare-ospite">Non ci sono richieste</div>
+            </div>
         </div>
+
+        <div class="box-offerta div-offerta-da-accettare">Napoli -Inter
+                <input id="offerta-da-accettare-id" type="hidden" value="offerta._id" >
+                <div class="offerte-da-accettare-ospite">
+                    <div class="offerta-da-accettare-ospite">PincoPanco
+                    <a class="button bt-ospita" id="button-offerta-da-accettare">Ospita</a>
+                    </div>
+                    <div class="offerta-da-accettare-ospite">PancoPinco
+                    <a class="button bt-ospita" id="button-offerta-da-accettare">Ospita</a>
+                    </div>
+                </div>
+            </div>
+
         <div id="offerte-accettate">
-            <label>OFFERTE ACCETTATE</label>
+            <label class="label labOfferteAccettate">OFFERTE ACCETTATE</label>
         </div>
         <div id="recensioni-da-fare">
-            <label>RECENSIONI DA FARE</label>
+            <label class="label labRecensioniDaFare">RECENSIONI DA FARE</label>
+            <div class="box-offerta div-recensione">Inter - Napoli
+            <input id="offerta-da-accettare-id" type="hidden" value="' + offerta._id + '" >
+            <div class="ifOspitante">Eri ospitante!</div>
+            <div class="recensione-da-fare-altro">PincoPanco</div>
+            <div><input id="recensione-da-fare-testo" type="text"></div>
+                <span class="fa fa-star checked "></span>
+                <span class="fa fa-star checked "></span>
+                <span class="fa fa-star checked "></span>
+                <span class="fa fa-star "></span>
+                <span class="fa fa-star "></span>
+            
+                    <a class="button" id="button-inserisci-recensione">Invia</a>
+            </div>
         </div>
     </body>
 </html>
