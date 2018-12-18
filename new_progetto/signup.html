@@ -1,0 +1,44 @@
+<html>
+    <head>
+        <title>Sign up</title>
+        <meta charset="utf-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1"/>
+        <link href="css/bootstrap.min.css" rel="stylesheet"/>
+        <link href="css/signup.css" rel="stylesheet"/>
+		</script>
+        <script type="text/javascript" lang="javascript" src="js/signupScript.js"></script>
+    </head>
+    <body class="text-center">
+        <form action="http://localhost:8888/signup" class="form-signin" method="POST" name="myForm" onSubmit="return validaForm()">
+            <img class="mb-4" src="../../assets/brand/bootstrap-solid.svg" alt="" width="72" height="72"/>
+            <h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>
+            Username:
+            <input type="text" name="username" class="form-control" placeholder="Username" required autofocus/>
+
+            Nome:
+            <input type="text" name="nome" class="form-control" placeholder="Name" required autofocus/>
+
+            Cognome:
+            <input type="text" name="cognome" class="form-control" placeholder="Last Name" required/>
+
+            Email:
+            <input type="email" name="email" class="form-control" placeholder="Email address" required/>
+
+            Password:
+            <input type="password" name="password" class="form-control" placeholder="Password" onchange="form.repeatPassword.pattern = RegExp.escape(this.value);" required/>
+
+            Ripeti Password:
+            <input type="password" id="repeatPassword" name="repeatPassword" onkeyup="checkPassword()" class="form-control" required/>
+
+            Sesso:
+            <input type="radio" name="sesso" value="M" /> M
+            <input type="radio" name="sesso" value="F" /> F
+            <br>
+            Data di nascita:
+            <input id="dataNascita" type="date" class="form-control" onchange="checkAge()" name="dataNascita" required>
+
+            <button name="registrationButton" class="btn btn-lg btn-primary btn-block" type="submit">Register</button>
+            <a href="../paginaLogin/login.html">Torna al login</a>
+        </form>        
+    </body>
+</html>

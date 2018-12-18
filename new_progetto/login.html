@@ -1,0 +1,36 @@
+<html>
+    <head>
+        <title>EsercitazioneLab - Pagina di login</title>
+        <meta charset="utf-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1"/>
+        <link href="css/bootstrap.min.css" rel="stylesheet"/>
+        <link href="css/signin.css" rel="stylesheet"/>
+		</script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        <script type="text/javascript" lang="javascript" src="js/loginScript.js"></script>
+    </head>
+    <body class="text-center">
+        <form action="/login" class="form-signin" method="POST" name="myForm" onSubmit="return validaForm()">
+            <img class="mb-4" src="../../assets/brand/bootstrap-solid.svg" alt="" 
+            width="72" height="72"/>
+            
+            <h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>
+            
+            <input type="text" name="username" class="form-control" placeholder="Username" required autofocus/>
+            
+            <input type="password" name="password" class="form-control" placeholder="Password" required/>
+            
+            <div id="divRemember" class="checkbox mb-3">
+                <input type="checkbox" name="remember"/>
+                <label for="remember">Remember me</label>
+            </div>
+
+            <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
+            
+            <!--Per ora creo un'altra pagina. Si potrebbe pure aprire sola una finestra pop-up-->
+            <a href="pwddim.html">Password dimenticata?</a>
+            <br>
+            <a href="http://localhost:8888/signup">Non sei ancora registrato?</a>
+        </form>
+    </body>
+</html>

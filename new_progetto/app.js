@@ -1,0 +1,839 @@
+/********************************************************************************************************************
+ * Il server è un semplice servizio che fornisce delle API per connettersi al database
+ * -OSS
+ *  Solo gli utenti registrati possono accedere al database
+ * 
+ * -API
+ * 1)Ogni utente può vedere tutte le informazioni degli altri utenti (eccetto la password):
+ *    GET /utente con data = {"username":"X"} ritorna le informazioni di quell'utente
+ * 
+ * 2) GET /caricaOfferte con data = {"homeTeam":"X","awayTeam":"Y"} ritorna tutte le offerte fatte
+ *                       da qualsiasi utente per la partita 'homeTeam - awayTeam'
+ * 
+ * 3) GET /myOfferte ritorna tutte le offerte fatte dall'utente che le richiede (si vede dalla connessione/cookie)
+ *                   e quelle in cui è ospitato
+ * 
+ * 4) POST /aggiungiOfferta con data = {"homeTeam":"X","awayTeam":"Y"} crea una nuova offerta dell'utente che
+ *                        la fa e ritorna l'id della nuova offerta
+ * 
+ * 5) POST /inviaRichiesta con data = {"id": "X"} aggiunge l'utente che ha fatto richiesta alla codaRichieste
+ *                         dell'offerta con id "X"
+ * 
+ * 6) POST /confermaRichiesta con data = {"id": "X","ospite":"Y"} mette come ospite dell'offerta "X" 
+ *                            l'utente "Y"
+ * 
+ * 7) POST /inviaRecensione con data = {"id": "X","recensione":"Y","ruolo":"Z"} inserisce nell'offerta "X" 
+ *                          la recensione "Y" nel ruolo di "Z"
+ * 
+ * //8) POST /getMessaggi con data = {"id": "X","min":Y,"max":Z} ritorna i messaggi relativi a un'offerta Y
+ *                        dal numero min al numero max
+ * 
+ *********************************************************************************************************************/
+
+var express = require('express');
+var session = require('express-session');
+var bodyParser = require("body-parser");
+var nano = require('nano')('http://localhost:5984');
+var request = require('request');
+
+var myHeader =  { 'X-Auth-Token': '9d86980a76af481d8388321e25ab6dd0' };
+
+var utenti = nano.db.use('utenti');
+var offerte = nano.db.use('offerte');
+ 
+var app = express();
+//var expressWs = require('express-ws')(app);
+
+var http = require('http').Server(app);
+var io = require('socket.io')(http);
+
+var _dir = 'C:\\Users\\HP\\Desktop\\progetto_new';
+express.static(_dir);
+var sessionMiddleware = session({
+    key: 'user_sid',
+    secret: 'ssshhhhh'
+});
+
+app.use(express.static('public'));
+
+app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
+    extended: true
+}));
+
+app.use(express.urlencoded());
+
+
+
+io.use(function(socket, next) {
+    sessionMiddleware(socket.request, socket.request.res, next);
+});
+
+app.use(sessionMiddleware);
+
+
+
+var sess;
+
+/*******************************************************************
+ * RICHIESTE                                                       *
+ *******************************************************************/
+
+
+/*************************************************************************************** 
+ * WEB SOCKET                                                                          *
+ ***************************************************************************************/
+
+io.on('connection', function(socket){
+    var username = socket.request.session.username;
+    console.log(socket.request.session.username + ' connected');
+
+    //Appena un utente si connette lo metto nel socket con tutti gli altri
+    offerte.view("offerteView", "myOfferte", {keys: [username]}).then((response) => {
+        console.log(JSON.stringify(response));
+        for(var i=0;i < response.rows.length;i++){
+            var offerta = response.rows[i].value;
+            //Se l'offerta è stata accettata creo una chat tra i due utenti
+            if(offerta.ospitato){
+                socket.join(JSON.stringify(offerta._id));
+                console.log("[*] Join su offerta " + offerta._id);
+            }
+        }
+
+        socket.on("messaggio",function(msg) {
+            console.log("[*] Messaggio: " + JSON.stringify(msg));
+            var id = msg.id;
+            var testo = msg.testo;
+            var ruolo = msg.ruolo;
+            var mittente = socket.request.session.username;
+            var partita = msg.partita;
+
+            var toSend = {
+                "id":id,
+                "messaggio": {
+                    "testo": testo
+                },
+                "mittente": mittente,
+                "ruolo": ruolo,
+                "partita": partita
+            };
+
+            //Quando ricevo un messaggio faccio broadcast
+            socket.broadcast.to(JSON.stringify(id)).emit('messaggio',toSend);
+            console.log("[*] Messaggio inviato");
+
+            //E poi lo metto nella coda
+            offerte.view('offerteView', 'getDocById', {keys: [id]}).then((response) => {
+                console.log("response: " + JSON.stringify(response.rows[0].value));
+    
+                var oldDoc = response.rows[0].value;
+
+                var toInsert = {
+                    "mittente": (mittente === oldDoc.ospitato)?"Ospitato":"Ospitante",
+                    "testo": testo
+                };
+
+                console.log("oldDoc: " + JSON.stringify(oldDoc));
+               
+                oldDoc.messaggi.push(toInsert);
+                
+                console.log("newDoc: " + JSON.stringify(oldDoc));
+    
+                offerte.insert(oldDoc).then((response) => {
+                    console.log(response);
+                }).catch((err) => {
+                    console.log(err);
+                });
+            }).catch((err) => {
+                console.log(err);
+                res.send("Errore Database!");
+            });
+
+        });
+    }).catch((err) => {
+        console.log(err);
+    });
+
+});
+
+
+ /*
+app.ws('/messaggi', function(ws, req) {
+    console.log(req.session.username);
+
+    ws.on('message', function(msg) {
+        console.log("[*]" + JSON.stringify(msg));
+        console.log("[*]" + JSON.stringify(ws));
+        //ws.send(msg);
+
+        var mex = msg.messaggio;
+        var id = msg.id;
+
+        
+        offerte.view('offerteView', 'getDocById', {keys: [id]}).then((response) => {
+            console.log("response: " + JSON.stringify(response.rows[0].value));
+
+            var oldDoc = response.rows[0].value;
+            console.log("oldDoc: " + JSON.stringify(oldDoc));
+
+            if(ruolo === "ospite") oldDoc["recensioneFattaDaOspite"] = recensione;//{"titolo":recensione,"numStelle":numStelle};
+            else oldDoc["recensioneFattaDaOspitante"] = recensione;//{"titolo":recensione,"numStelle":numStelle};
+            
+            console.log("newDoc: " + JSON.stringify(oldDoc));
+
+            offerte.insert(oldDoc).then((response) => {
+                console.log(response);
+                res.send({"message":"ok"});
+            }).catch((err) => {
+                console.log(err);
+                res.send({"message":"error"});
+            });
+        }).catch((err) => {
+            console.log(err);
+            res.send("Errore Database!");
+        });
+    });
+
+});*/
+
+
+//--------------------------------------------------------------------------------------------
+
+//FILE
+app.get('/utente/*', function(req,res){
+    sess = req.session;
+    console.log(req.url);
+    //debug
+    if(sess.username) {
+        console.log(_dir + req.url);
+        res.sendFile(_dir + req.url);
+    }
+    else {
+        res.status(403);
+        res.redirect('/login');
+    }
+});
+
+app.get('/login', function(req,res){
+    sess = req.session;
+    if(!sess.username){
+        res.sendFile(_dir + '\\login.html');
+    }
+    else{
+        res.redirect("/utente/main.html");
+    }
+});
+
+app.get('/signup', function(req,res){
+    sess = req.session;
+    if(!sess.username){
+        res.sendFile(_dir + '\\signup.html');
+    }
+    else{
+        res.redirect("/utente/main.html");
+    }
+});
+
+app.get('/', function(req,res){
+    res.redirect("/login");
+});
+
+//AUTENTICAZIONE
+app.post('/login', function(req,res){
+    console.log("[*] Utente cerca di loggarsi con i dati:\n\t" + JSON.stringify(req.body));
+    if(req.body.username && req.body.password){
+        var username = req.body.username;
+        var password = req.body.password;
+        utenti.view('tmp', 'login', {keys: [[username, password]]}).then((response) => {
+            console.log(response);
+            if(response.rows.length > 0){
+                console.log("[*] L'autenticazione è andata a buon fine");          
+                sess = req.session;
+                sess.username = username;
+                res.send('<html><script>var u = {\
+                    "username": "' +  response.rows[0].value.username + '",\
+                    "nome": "' +  response.rows[0].value.nome + '",\
+                    "cognome": "' +  response.rows[0].value.cognome + '",\
+                    "squadra": "inter",\
+                    "sesso": "' +  response.rows[0].value.sesso + '",\
+                    "dataNascita": "' +  response.rows[0].value.dataNascita + '"\
+                };\
+                localStorage.utente = JSON.stringify(u);\
+                window.location.replace("/utente/main.html");</script></html>');
+            }
+            else{
+                res.send("autenticazione fallita!");
+            }
+        }).catch((err) => {
+            console.log(err);
+            res.send("Errore Database!");
+        });
+    }
+    else{
+        res.send({"msg":"autenticazione fallita!"});
+    }
+});
+
+//LOG OUT
+app.get("/logout",function(req,res){
+    sess = req.session;
+    if(sess.username){
+        res.clearCookie('user_sid');
+    }
+    res.redirect("/login");
+});
+
+//2) GET /caricaOfferte con data = {"homeTeam":"X","awayTeam":"Y"} ritorna tutte le offerte fatte
+//                      da qualsiasi utente per la partita 'homeTeam - awayTeam'
+app.get("/caricaOfferte", function(req,res){
+    sess = req.session;
+    if(sess.username){
+
+        var homeTeam = req.query.homeTeam;
+        var awayTeam = req.query.awayTeam;
+
+        console.log("[*] L'utente " + sess.username + " sta cercando offerte della partita " + homeTeam + " - " + awayTeam);
+
+        offerte.view("offerteView", "caricaOfferte", {keys: [[homeTeam,awayTeam]]}).then((response) => {
+            console.log(response);
+            console.log("[*] Invio la risposta a " + sess.username);
+            res.send(response);
+        }).catch((err) => {
+            console.log(err);
+            res.send({"ok":false});
+        });
+    }
+    else{
+        res.send({"msg":"no"});
+    }
+
+})
+
+//3) GET /myOfferte ritorna tutte le offerte fatte dall'utente che le richiede (si vede dalla connessione/cookie)
+app.get("/myOfferte", function(req,res){
+    sess = req.session;
+    if(sess.username){
+        //var r = view(offerte,"offerteView","myOfferte",["pippo"]);
+        offerte.view("offerteView", "myOfferte", {keys: [sess.username]}).then((response) => {
+            res.send(response);
+        }).catch((err) => {
+            console.log(err);
+            res.send("Errore Database!");
+        });
+    }
+    else{
+        res.send({"msg":"no"});
+    }
+
+})
+
+//4) POST /aggiungiOfferta con data = {"homeTeam":"X","awayTeam":"Y"} crea una nuova offerta dell'utente che
+//                         la fa e ritorna l'id della nuova offerta
+app.post("/aggiungiOfferta", function(req,res){
+    sess = req.session;
+    if(sess.username){
+        console.log("[*] L'utente " + "pippo" + " sta inserendo " + req.body.homeTeam + " - " + req.body.awayTeam);
+        //var r = view(offerte,"offerteView","myOfferte",["pippo"]);
+        
+        var data = {
+            homeTeam: req.body.homeTeam,
+            awayTeam: req.body.awayTeam,
+            ospitante: "pippo", //sess.username
+            codaRichieste: []
+        };
+
+        offerte.insert(data).then((response) => {
+            console.log(JSON.stringify(response));
+            res.send(response);
+        }).catch((err) => {
+            console.log(err);
+            res.send({"ok": false});
+        });
+    }
+    else{
+        res.send({"msg":"no"});
+    }
+});
+
+//5) POST /inviaRichiesta con data = {"id": "X"} aggiunge l'utente che ha fatto richiesta alla codaRichieste
+//                        dell'offerta con id "X"
+app.post("/inviaRichiesta", function(req,res){
+    sess = req.session;
+    if(sess.username){
+        console.log("[*] L'utente " + sess.username + " sta facendo richiesta");
+
+        var ospite = sess.username;
+        var id = req.body.id;
+        
+        offerte.view('offerteView', 'getDocById', {keys: [id]}).then((response) => {
+            console.log("response: " + JSON.stringify(response));
+
+            var oldDoc = response.rows[0].value;
+            console.log("oldDoc: " + JSON.stringify(oldDoc));
+
+            oldDoc.codaRichieste.push(ospite);
+
+            offerte.insert(oldDoc).then((response) => {
+                console.log(response);
+                //res.sendFile('C:/Users/HP/Desktop/Terzo anno/linguaggi e tecnologie per il web/progetto/utente/main.html');
+                res.send(response);
+            }).catch((err) => {
+                console.log(err);
+                res.send({"ok":false});
+            });
+        }).catch((err) => {
+            console.log(err);
+            res.send("Errore Database!");
+        });
+    }
+    else{
+        res.send({"msg":"no"});
+    }
+});
+
+//6) POST /confermaRichiesta con data = {"id": "X","ospite":"Y"} mette come ospite dell'offerta "X" 
+//                           l'utente "Y"
+app.post("/confermaRichiesta", function(req,res){
+    sess = req.session;
+    if(sess.username){
+        console.log("[*] L'utente " + sess.username + " sta confermando la richiesta di " + req.body.ospitato);
+
+        var ospitante = sess.username;
+        var ospitato = req.body.ospitato;
+        var id = req.body.id;
+
+        
+        offerte.view('offerteView', 'getDocById', {keys: [id]}).then((response) => {
+            console.log("response: " + JSON.stringify(response));
+
+            var oldDoc = response.rows[0].value;
+            console.log("oldDoc: " + JSON.stringify(oldDoc));
+
+            oldDoc.codaRichieste = [];
+            oldDoc.messaggi = [];
+            oldDoc.ospitato = ospitato;
+
+            offerte.insert(oldDoc).then((response) => {
+                console.log(response);
+                res.send(response);
+            }).catch((err) => {
+                console.log(err);
+                res.send({"ok":false});
+            });
+        }).catch((err) => {
+            console.log(err);
+            res.send("Errore Database!");
+        });
+    }
+    else{
+        res.send({"msg":"no"});
+    }
+});
+
+//7) POST /inviaRecensione con data = {"id": "X","recensione":"Y","ruolo":"Z"} inserisce nell'offerta "X" 
+//                         la recensione "Y" nel ruolo di "Z"
+app.post("/inviaRecensione", function(req,res){
+    sess = req.session;
+    if(sess.username){
+        console.log("[*] L'utente " + sess.username + " sta inviando una recensione " + JSON.stringify(req.body));
+
+        var ospitante = sess.username;
+        var ruolo = req.body.ruolo;
+        var id = req.body.id;
+        var recensione = req.body.recensione;
+
+        
+        offerte.view('offerteView', 'getDocById', {keys: [id]}).then((response) => {
+            console.log("response: " + JSON.stringify(response.rows[0].value));
+
+            var oldDoc = response.rows[0].value;
+            console.log("oldDoc: " + JSON.stringify(oldDoc));
+
+            if(ruolo === "ospite") oldDoc["recensioneFattaDaOspite"] = recensione;//{"titolo":recensione,"numStelle":numStelle};
+            else oldDoc["recensioneFattaDaOspitante"] = recensione;//{"titolo":recensione,"numStelle":numStelle};
+            
+            console.log("newDoc: " + JSON.stringify(oldDoc));
+
+            offerte.insert(oldDoc).then((response) => {
+                console.log(response);
+                res.send({"message":"ok"});
+            }).catch((err) => {
+                console.log(err);
+                res.send({"message":"error"});
+            });
+        }).catch((err) => {
+            console.log(err);
+            res.send("Errore Database!");
+        });
+    }
+    else{
+        res.send({"msg":"no"});
+    }
+});
+
+//8) POST /getMessaggi con data = {"id": "X","min":Y,"max":Z} ritorna i messaggi relativi a un'offerta Y
+//                     dal numero min al numero max
+app.post("/getMessaggi",function(req,res) {
+    sess = req.session;
+    if(sess.username){
+        console.log("[*] L'utente " + sess.username + " sta richiedendo messaggi");
+
+        var ospitante = sess.username;
+        var id = req.body.id;
+        var min = req.body.min;
+        var max = req.body.max;
+
+        
+        offerte.view('offerteView', 'getDocById', {keys: [id]}).then((response) => {
+            console.log("response: " + JSON.stringify(response.rows[0].value));
+            var doc = response.rows[0].value;
+            if(doc.messaggi){
+                res.send(doc.messaggi);
+            }
+            else{
+                res.send({});
+            }
+        }).catch((err) => {
+            console.log(err);
+            res.send("Errore Database!");
+        });
+    }
+    else{
+        res.send({"msg":"no"});
+    }
+});
+
+/*******************************************************************
+ * API FOOTBALL                                                    *
+ *******************************************************************/
+
+//Ritorno le partite della champsion
+app.get('/teams', function(req, res){
+    request({headers: myHeader,uri:'https://api.football-data.org/v2/competitions/CL/teams',method:'GET'}, function (error, response, body) {
+      if (!error && response.statusCode == 200) {
+        var info = JSON.parse(body);
+        res.send(info);
+      }
+    })
+  });
+  
+//Ritorno le squadre partecipanti
+app.get('/matches', function(req, res){
+    request({headers: myHeader,uri:'https://api.football-data.org/v2/competitions/CL/matches',method:'GET'}, function (error, response, body) {
+      if (!error && response.statusCode == 200) {
+        var info = JSON.parse(body);
+        res.send(info);
+      }
+    })
+  });
+
+/*
+//CARICA OFFERTE
+app.post('/utente/caricaOfferte', function(req,res){
+    console.log("debug");
+    sess = req.session;
+    console.log(req.url);
+    console.log(req.body);
+    //debug
+    if(true){//sess.email) {
+        var homeTeam = req.body.homeTeam;
+        var awayTeam = req.body.awayTeam;
+        var ospitante = req.body.ospitante;
+        
+        offerte.view('offerteView', 'cercaOfferta', {keys: [[homeTeam, awayTeam]]}).then((response) => {
+            console.log(response);
+            res.send(response);
+        }).catch((err) => {
+            console.log(err);
+            res.send("Errore Database!");
+        });
+    }
+    else {
+        res.sendFile('C:\\Users\\HP\\Desktop\\Terzo anno\\linguaggi e tecnologie per il web\\progetto\\paginaLogin\\login.html');
+    }
+});
+
+//UPLOAD RICHIESTA
+app.post('/utente/uploadRichiesta', function(req,res){
+    sess = req.session;
+    console.log(req.url);
+    console.log(req.body);
+    //debug
+    if(true){//sess.email) {
+        var id = req.body._id;
+        var ospite = req.body.ospite;
+        var data;
+        
+        offerte.view('offerteView', 'retrieveDoc', {keys: [id]}).then((response) => {
+            console.log("response: " + JSON.stringify(response.rows[0].value));
+
+            var oldDoc = response.rows[0].value;
+            console.log("oldDoc: " + JSON.stringify(oldDoc));
+
+            oldDoc.codaRichieste.push(ospite);
+
+            offerte.insert(oldDoc).then((response) => {
+                console.log(response);
+                res.send({"message":"ok"});
+            }).catch((err) => {
+                console.log(err);
+                res.send({"message":"error"});
+            });
+        }).catch((err) => {
+            console.log(err);
+            res.send("Errore Database!");
+        });
+    }
+    else {
+        res.sendFile('C:\\Users\\HP\\Desktop\\Terzo anno\\linguaggi e tecnologie per il web\\progetto\\paginaLogin\\login.html');
+    }
+});
+
+//CARICO TUTTE LE OFFERTE DELL'OSPITANTE DAL DATABASE
+app.post('/utente/loadOfferte', function(req,res){
+    sess = req.session;
+    console.log(req.url);
+    console.log(req.body);
+    //debug
+    if(true){//sess.email) {
+        var username = req.body.username;
+        var data = {};
+        
+        offerte.view('offerteView', 'retrieveOfferteByOspitante', {keys: [username]}).then((response) => {
+            console.log("ospitante:\n\n " + JSON.stringify(response.rows));
+            data["offerteOspitante"] = response.rows;
+            offerte.view('offerteView', 'retrieveOfferteByOspitato', {keys: [username]}).then((response) => {
+                console.log("ospitato:\n\n " + JSON.stringify(response.rows));
+                data["offerteOspitato"] = response.rows;
+                console.log("data : \n\n" + JSON.stringify(data));
+                res.send(data)
+            }).catch((err) => {
+                console.log(err);
+                res.send("Errore Database!");
+            });
+
+        }).catch((err) => {
+            console.log(err);
+            res.send("Errore Database!");
+        });
+    }
+    else {
+        res.sendFile('C:\\Users\\HP\\Desktop\\Terzo anno\\linguaggi e tecnologie per il web\\progetto\\paginaLogin\\login.html');
+    }
+});
+
+//ACCETTO RICHIESTA OFFERTA DI UN OSPITE
+app.post('/utente/accettaRichiesta', function(req,res){
+    sess = req.session;
+    console.log(req.url);
+    console.log(req.body);
+    //debug
+    if(true){//sess.email) {
+        var id = req.body.id;
+        var ospitato = req.body.ospitato;
+        
+        offerte.view('offerteView', 'retrieveDoc', {keys: [id]}).then((response) => {
+            console.log("response: " + JSON.stringify(response.rows[0].value));
+
+            var oldDoc = response.rows[0].value;
+            console.log("oldDoc: " + JSON.stringify(oldDoc));
+
+            oldDoc.codaRichieste = [];
+            oldDoc["ospitato"] = ospitato;
+            
+            console.log("newDoc: " + JSON.stringify(oldDoc));
+
+            offerte.insert(oldDoc).then((response) => {
+                console.log(response);
+                res.send({"message":"ok"});
+            }).catch((err) => {
+                console.log(err);
+                res.send({"message":"error"});
+            });
+        }).catch((err) => {
+            console.log(err);
+            res.send("Errore Database!");
+        });
+    }
+    else {
+        res.sendFile('C:\\Users\\HP\\Desktop\\Terzo anno\\linguaggi e tecnologie per il web\\progetto\\paginaLogin\\login.html');
+    }
+});
+
+//INVIA RECENSIONE
+app.post('/utente/inviaRecensione', function(req,res){
+    sess = req.session;
+    console.log(req.url);
+    console.log(req.body);
+    //debug
+    if(true){//sess.email) {
+        var id = req.body.id;
+        var recensione = req.body.recensione;
+        var numStelle = req.body.numStelle;
+        
+        offerte.view('offerteView', 'retrieveDoc', {keys: [id]}).then((response) => {
+            console.log("response: " + JSON.stringify(response.rows[0].value));
+
+            var oldDoc = response.rows[0].value;
+            console.log("oldDoc: " + JSON.stringify(oldDoc));
+
+            oldDoc.codaRichieste = [];
+            if(req.body.ospite) oldDoc["recensioneFattaDaOspite"] = {"titolo":recensione,"numStelle":numStelle};
+            else oldDoc["recensioneFattaDaOspitante"] = {"titolo":recensione,"numStelle":numStelle};
+            
+            console.log("newDoc: " + JSON.stringify(oldDoc));
+
+            offerte.insert(oldDoc).then((response) => {
+                console.log(response);
+                res.send({"message":"ok"});
+            }).catch((err) => {
+                console.log(err);
+                res.send({"message":"error"});
+            });
+        }).catch((err) => {
+            console.log(err);
+            res.send("Errore Database!");
+        });
+    }
+    else {
+        res.sendFile('C:\\Users\\HP\\Desktop\\Terzo anno\\linguaggi e tecnologie per il web\\progetto\\paginaLogin\\login.html');
+    }
+});
+
+
+//CHECK IF NEW DATA IN DATABASE
+app.post('/utente/polling', function(req,res){
+    sess = req.session;
+    console.log(req.url);
+    console.log(req.body);
+    //debug
+    if(true){//sess.email) {
+        var username = req.body.username;
+        
+        offerte.view('offerteView', 'retrieveOfferta', {keys: [id]}).then((response) => {
+            console.log("response: " + JSON.stringify(response.rows));
+
+            var oldDoc = response.rows[0].value;
+            console.log("oldDoc: " + JSON.stringify(oldDoc));
+
+            oldDoc.codaRichieste.push(ospite);
+
+            offerte.insert(oldDoc).then((response) => {
+                console.log(response);
+                res.send({"message":"ok"});
+            }).catch((err) => {
+                console.log(err);
+                res.send({"message":"error"});
+            });
+        }).catch((err) => {
+            console.log(err);
+            res.send("Errore Database!");
+        });
+    }
+    else {
+        res.sendFile('C:\\Users\\HP\\Desktop\\Terzo anno\\linguaggi e tecnologie per il web\\progetto\\paginaLogin\\login.html');
+    }
+});
+
+
+app.get('/',function(req,res){
+    sess = req.session;
+    console.log(req.url);
+    if(sess.email) {
+        res.sendFile('C:\\Users\\HP\\Desktop\\Terzo anno\\linguaggi e tecnologie per il web\\progetto\\utente\\index.html');
+    }
+    else {
+        res.sendFile('C:\\Users\\HP\\Desktop\\Terzo anno\\linguaggi e tecnologie per il web\\progetto\\paginaLogin\\login.html');
+    }
+});
+
+
+//LOGIN
+app.get('/login', function(req,res){
+    res.sendFile('C:\\Users\\HP\\Desktop\\Terzo anno\\linguaggi e tecnologie per il web\\progetto\\paginaLogin\\login.html');
+});
+
+app.post('/login', function(req,res){
+    var email = req.body.email;
+    var password = req.body.password;
+    utenti.view('tmp', 'login', {keys: [[email, password]]}).then((response) => {
+        console.log(response);
+        if(response.rows.length > 0){          
+            sess = req.session;
+            sess.email=req.body.email;
+            res.send('<html><script>var u = {\
+                "username": "' +  response.rows[0].value[0] + '",\
+                "nome": "' +  response.rows[0].value[1] + '",\
+                "cognome": "' +  response.rows[0].value[2] + '",\
+                "squadra": "inter",\
+                "sesso": "' +  response.rows[0].value[3] + '",\
+                "dataNascita": "' +  response.rows[0].value[4] + '"\
+            };localStorage.utente = JSON.stringify(u);window.location.replace("http://localhost:8888/utente/main.html");</script></html>');
+        }
+        else{
+            res.sendFile('C:\\Users\\HP\\Desktop\\Terzo anno\\linguaggi e tecnologie per il web\\progetto\\paginaLogin\\login.html');
+        }
+    }).catch((err) => {
+        console.log(err);
+        res.send("Errore Database!");
+    });
+});
+
+
+
+//SIGNUP
+app.get('/signup', function(req,res){
+    res.sendFile('C:\\Users\\HP\\Desktop\\Terzo anno\\linguaggi e tecnologie per il web\\progetto\\paginaRegistrazione\\signup.html');
+});
+
+app.post('/signup', function(req,res){
+    var username = req.body.username;
+    var nome = req.body.nome;
+    var cognome = req.body.cognome;
+    var email = req.body.email;
+    var password = req.body.password;
+    var sesso = req.body.sesso;
+    var dataNascita = req.body.dataNascita;
+
+    utenti.view('tmp', 'check_email_user', {keys: [email, username]}).then((response) => {
+        if(response.rows.length == 0){
+            var data = { 
+                username: req.body.username,
+                nome: req.body.nome,
+                cognome: req.body.cognome,
+                email: req.body.email,
+                password: req.body.password,
+                sesso: req.body.sesso,
+                dataNascita: req.body.dataNascita
+            };
+    
+            utenti.insert(data).then((response) => {
+                res.sendFile('C:\\Users\\HP\\Desktop\\Terzo anno\\linguaggi e tecnologie per il web\\progetto\\paginaLogin\\login.html');
+            }).catch((err) => {
+                console.log(err);
+                res.send("Errore Database!");
+            });
+        }
+        else{
+            res.sendFile('C:\\Users\\HP\\Desktop\\Terzo anno\\linguaggi e tecnologie per il web\\progetto\\paginaRegistrazione\\signup.html');
+        }
+    }).catch((err) => {
+        console.log(err);
+        res.send("Errore Database!");
+    });
+});*/
+
+/*var WebSocketServer = ws.Server;
+wss = new WebSocketServer({port: 40510});
+
+wss.on('connection', function (ws) {
+  ws.on('message', function (message) {
+    console.log('received: %s', message);
+  });
+  setInterval(
+    () => ws.send('${new Date()}'),
+    1000);
+});*/
+
+http.listen(8888, function(){
+    console.log("[*] Server in ascolto sulla porta 8888");
+});

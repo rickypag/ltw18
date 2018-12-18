@@ -1,0 +1,92 @@
+ /* Style the tab */
+ .tab {
+    overflow: hidden;
+    border: 1px solid white;
+}
+
+.info{
+    color: white;
+}
+
+/* Style the buttons that are used to open the tab content 
+.tab button {
+    background-color: inherit;
+    float: left;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    padding: 14px 16px;
+    transition: 0.3s;
+}
+
+/* Change background color of buttons on hover 
+.tab button:hover {
+    background-color: #ddd;
+}
+
+/*Create an active/current tablink class 
+.tab button.active {
+    background-color: #ccc;
+}*/
+
+/* Style the tab content */
+.tabcontent {
+    display: none;
+    padding: 6px 12px;
+    border: 1px solid #ccc;
+    border-top: none;
+} 
+
+/*stars*/
+.checked {
+    color: orange;
+}
+
+/*Stile per gestire i link: li modello come bottoni*/
+
+.button {
+    padding: 14px 25px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    border-radius: 4px;
+    background-color: rgba(245, 245, 245, 0.616);
+}
+
+.button:hover{
+    text-decoration: none;
+    color: whitesmoke;
+}
+
+.button.active{
+    background-color:white;
+}
+
+.titoloRec{
+    color: white;
+}
+
+.valore{
+    color: darkblue;
+}
+
+/*sfondo*/
+.sfondo {
+    background-image: url("../images/inter.png");
+    background-color: #cccccc;
+    height: 100%;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    position: relative;
+    background-attachment: fixed;
+    top: 50px;
+  }
+
+.buttonImg {
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    border-radius: 4px;
+    background-color: white;
+}

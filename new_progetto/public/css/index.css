@@ -1,0 +1,97 @@
+/*Stile per gestire i link: li modello come bottoni*/
+
+.button {
+    padding: 14px 25px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    border-radius: 4px;
+    color: black;
+    background-color: #f44336;
+}
+
+.button:hover{
+    text-decoration: none;
+    color: black;
+}
+
+.button:active{
+    background-color: #A61E20;
+}
+
+.search{
+    margin-top: 2px;
+    margin-bottom: 50px;
+    background-color: #f44336;
+    padding: 5px 15px;
+    font-family: Tahoma, Geneva, sans-serif;
+    font-weight: bold;
+    font-size: 30px;
+}
+
+
+/*Stile per gestire la barra di ricerca*/
+.search-box {
+    font-family: 'Lucida Sans';
+    font-size: 30px;
+    border-radius: 4px;
+    box-shadow: none;
+    width:calc(100% - 20px);
+    margin: 0px 10px;
+}
+
+.back-box {
+    background-color:greenyellow;
+    color: grey;
+}
+
+.front-box {
+    background: transparent;
+    width:calc(100% - 20px);
+    margin: 0px 10px;
+}
+
+.overlay {
+    position: relative;
+    width: 100%;
+    margin-bottom: 0px;
+}
+
+.front-div {
+    position: absolute;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    top: 75px
+}
+
+.back-div {
+    text-align: center;
+    position: relative;
+    width: 100%;
+    top: 50px
+}
+
+
+/*Stile blocchi offerte*/
+.box-offerta{
+    max-width: 400px;
+    width: 100%;
+    margin: 10px auto;
+    padding: 10px;
+    background-color: lightskyblue;
+    border-radius: 5px;
+    text-align: center;
+}
+
+.box-offerta .nome-partita{
+    font-family: 'Courier New';
+}
+
+
+/*Stile elementi sotto la barra di navigazione*/
+.elements{
+    text-align: center;
+    padding-top: 50px
+}
+
