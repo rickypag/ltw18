@@ -273,6 +273,42 @@ app.post('/login', function(req,res){
     }
 });
 
+//REGISTRAZIONE
+app.post('/signup', function(req,res){
+    var username = req.body.username;
+    var email = req.body.email;
+
+    utenti.view('tmp', 'check_email_user', {keys: [email, username]}).then((response) => {
+        if(response.rows.length == 0){
+            var data = {
+                username: req.body.username,
+                nome: req.body.nome,
+                cognome: req.body.cognome,
+                email: req.body.email,
+                password: req.body.password,
+                dataNascita: req.body.dataNascita
+            };
+            
+            if(req.body.sesso){
+                data.sesso = req.body.sesso;
+            }
+    
+            utenti.insert(data).then((response) => {
+                res.redirect("/login");
+            }).catch((err) => {
+                console.log(err);
+                res.send("Errore Database!");
+            });
+        }
+        else{
+            res.redirect('/signup');
+        }
+    }).catch((err) => {
+        console.log(err);
+        res.send("Errore Database!");
+    });
+});
+
 //LOG OUT
 app.get("/logout",function(req,res){
     sess = req.session;

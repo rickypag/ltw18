@@ -8,7 +8,6 @@
         <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
         <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
         <script src="../js/socket.io-client/dist/socket.io.js"></script>
-        <link href="../css/index.css" rel="stylesheet"/>
         <link href="../css/notify.css" rel="stylesheet"/>
         <link href="../css/profilo.css" rel="stylesheet"/>
         <link href="../css/bootstrap.min.css" rel="stylesheet"/>
@@ -38,16 +37,17 @@
                         </form>
                     </div>
                     <form id="nuova-offerta" class="form">
-                        <label>Inserisci un nuovo evento: </label>
+                        <div>Hai a disposizione un letto per ospitare qualcuno in trasferta?</div>
+                        <div>Fallo sapere a chi ne ha bisogno!</div>
                         <div>
                             <select id="selPartitaHome" name="selPartitaHome" class="selPartita home"><option value="null">---</option></select>
-                            <select id="selPartitaAway" class="selPartita away"><option value="Napoli">Napoli</option></select>
+                            <select id="selPartitaAway" name="selPartitaAway" class="selPartita away"><option value="null">Non ci sono partite disponibili</option></select>
                         </div>
                         <a id="creaOfferta" class="button buttonNuovaOfferta">crea offerta</a>
                     </form>
             
             
-                    <div id="ospiti-da-accettare">
+                    <div id="ospiti-da-accettare" class="wrapper">
                         <label class="label labOspitiDaAccettare">OSPITI DA ACCETTARE</label>
             
                     <div id="div-offerta-da-accettare-esempio">
@@ -72,7 +72,7 @@
                         </div>
                     </div>
             
-                    <div id="offerte-accettate">
+                    <div id="offerte-accettate" class="wrapper">
                         <label class="label labOfferteAccettate">OFFERTE ACCETTATE</label>
             
                         <div id="div-offerte-accettate-esempio">
@@ -85,7 +85,8 @@
                         </div>
             
                     </div>
-                    <div id="recensioni-da-fare">
+
+                    <div id="recensioni-da-fare" class="wrapper">
                         <label class="label labRecensioniDaFare">RECENSIONI DA FARE</label>
             
                         <div id="div-recensione-esempio">
@@ -97,15 +98,16 @@
                                 </div>          
                                 
                                 <div class="recensione-da-fare-altro">PincoPanco</div>
-                                <div>
-                                    <input id="recensione-da-fare-testo" type="text">
+                                <div class="recensione-da-fare-testo">
+                                    <input type="text" placeholder="Dai un titolo alla recensione"/>
                                 </div>
-                                <a id="contenitore-stelle">
-                                    <span id="stella0" class="fa fa-star checked "></span>
-                                    <span id="stella1" class="fa fa-star " ></span>
-                                    <span id="stella2" class="fa fa-star " ></span>
-                                    <span id="stella3" class="fa fa-star " ></span>
-                                    <span id="stella4" class="fa fa-star " ></span>
+                                <a class="contenitore-stelle">
+                                    <input type="hidden" name="numStelle" value="1" />
+                                    <span class="fa fa-star checked stella0"></span>
+                                    <span class="fa fa-star stella1" ></span>
+                                    <span class="fa fa-star stella2" ></span>
+                                    <span class="fa fa-star stella3" ></span>
+                                    <span class="fa fa-star stella4" ></span>
                                 </a>
                                 <a class="button" id="button-inserisci-recensione">Invia</a>
                             </div>

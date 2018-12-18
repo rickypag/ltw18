@@ -1,5 +1,5 @@
 function validaForm(){
-    return checkPassword() && checkDate();
+    return checkPassword() && checkAge();
 }
 
 function checkAge(){

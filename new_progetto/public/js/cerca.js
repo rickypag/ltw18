@@ -169,7 +169,7 @@ $(document).ready(function(){
     //--------------------------------------------------------------------------------------------
 
     //Barra di ricerca di dietro, quando cambia il valore carico offerte diverse
-    $('#back-search').change(function() {
+    /*$('#back-search').change(function() {
             console.log("ok");
             if($(this).val() !== ""){
                 cercaSquadra();
@@ -179,7 +179,7 @@ $(document).ready(function(){
                 $("#divOfferte").empty();
                 $("#scrittaOfferte").empty();
             }
-    });
+    });*/
 
     //Barra di ricerca di davanti
     $('#front-search').on({
@@ -265,11 +265,18 @@ $(document).ready(function(){
         c.done(function(msg) {
             alert(JSON.stringify(msg));
             $(t).parent().parent().remove();
-            window.location.replace("/utente/main.html");
+            aggiungiNotifica(nuovaNotificaMessaggio("La richiesta è stata inoltrata"),"successo");
+            changePage("home");
+            $("#squadre").empty();
+            $("#divOfferte").empty();
+            $("#scrittaOfferte").empty();
+            $("#front-search").val("");
+            $("#back-search").val("");
         });
     
         c.fail(function(err){
-            alert("Errore nella richiesta dell'offerta " + JSON.stringify(err));
+            console.log("Errore nella richiesta dell'offerta " + JSON.stringify(err));
+            aggiungiNotifica(nuovaNotificaMessaggio("La richiesta è stata inoltrata"),"errore");
         });
 
     });

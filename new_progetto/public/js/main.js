@@ -47,7 +47,6 @@ function addPage(page){
 
 //Gestisce la nav bar
 function changePage(page){
-    var toAppend = '</div><div class="page" id="' + page + 'Page" style="display: none;">';
     if($('#' + page + 'Page').length === 0){
         console.log("Pagina " + page + " caricata");
         addPage(page);
@@ -75,7 +74,7 @@ function tmp(page) {
  *******************************************************************/
 
 //Creo gli stili delle notifiche che mi servono
-function aggiungiStili(){
+/*function aggiungiStili(){
     //STILE NOTIFICHE NORMALI-AGGIORNAMENTI
     $.notify.addStyle('aggiornamento', {
         html: 
@@ -89,7 +88,7 @@ function aggiungiStili(){
             "</div>" +
           "</div>"
     });
-}
+}*/
 
 function nuovaNotifica(partita,username,descrizione){
     var t = "<div class='notification'>" +
@@ -100,6 +99,12 @@ function nuovaNotifica(partita,username,descrizione){
                     "<label class='descrizione' />" + descrizione + "</label>" +
                 "</div>" +
             "</div>";
+    return t;
+}
+
+function nuovaNotificaMessaggio(msg,stato){
+    console.log("stato: " + stato);
+    var t = "<div class='notification " + stato + "'>" + msg + "</div>";
     return t;
 }
 
@@ -132,6 +137,8 @@ function aggiungiNotifica(notifica){
 function iniziaProgramma(){
     countCaricamento--;
     if(countCaricamento === 0){
+        //Una volta che ho caricato tutti gli elementi gli associo i gestori di eventi
+        eventsHandler();
         $("#schermata-caricamento").css("display","none");
         console.log("Tutto a posto");
     }
@@ -277,19 +284,14 @@ function getSquadreAway(sq){
 }
 
 //Cambia il colore delle stelle quando le clicchi
-function stellaCliccata_A(list, id){
-    var num = 0;
-    if(id == "stella0") num = 1;
-    else if(id == "stella1") num = 2;
-    else if(id == "stella2") num = 3;
-    else if(id == "stella3") num = 4;
-    else if(id == "stella4") num = 5;
+function stellaCliccata_A(list, value){
+    var num = value;
     for(var i=0; i<5; i++){
         if(i<num){
-            list[i].className="fa fa-star checked";
+            list[i].className="fa fa-star checked stella" + i;
         }
         else{
-            list[i].className="fa fa-star";
+            list[i].className="fa fa-star stella" + i;
         }
     }
 }
@@ -508,52 +510,11 @@ function controllaCambiamenti(listaOfferte){
 }
 
 
-
-
 /*******************************************************************
- * MAIN                                                            *
- *******************************************************************/
+* EVENT HANDLER                                                    *
+*******************************************************************/
 
-$(document).ready(function(){
-    getSquadre();
-    getPartite();
-    caricaMain();
-
-    /*******************************************************************
-     * GESTIONE WEBSOCKET                                              *
-     *******************************************************************/
-
-    var socket = io();
-
-    socket.on('messaggio', function(msg){
-        console.log("Hai ricevuto un messaggio");
-        var id = msg.id;
-        var ruolo = msg.ruolo;
-        var username = msg.mittente;
-        var partita = msg.partita;
-        //var ruolo = $("input[value=" + id + "]").siblings(".ruolo").text();
-        //var username = $("input[value=" + id + "]").siblings(".username").text();
-        //var partita = $("input[value=" + id + "]").siblings(".partita").text();
-        if(username !== localStorage.parse(utente).username){
-            if($("#" + id + "-chat").length === 0){
-                var not = nuovaNotifica(partita,username,"ti ha inviato un messaggio");
-                aggiungiNotifica(not);
-            }
-            else if($("#" + id + "-chat").css("display") === "none"){
-                inserisciMessaggio(id,msg.messaggio,ruolo);
-                var not = nuovaNotifica(partita,username);
-                aggiungiNotifica(not);
-            }
-            else if($("#" + id + "-chat").length !== 0){
-                inserisciMessaggio(id,msg.messaggio,ruolo);
-            }
-        }
-    });
-
-    /*******************************************************************
-     * EVENT HANDLER                                                 *
-     *******************************************************************/
-
+function eventsHandler(){
     //Quando seleziono una squadra dal menu a tendina automaticamente mi aggiorna le squadreAway
     $("#selPartitaHome").change(function() {
         $("#selPartitaAway").children().remove();
@@ -564,9 +525,14 @@ $(document).ready(function(){
     //--------------------------------------------------------------------------------------------
     
     //Quando clicco una stella evidenzio le stelle per quella recensione
-    $("contenitore-stelle").children("span").click(function() {
-        var list = $(this).parent().children();
-        stellaCliccata_A(list, $(this).attr("id"));
+    $(".div-recensione").on("click","span",function() {
+        console.log("stella cliccata");
+        var list = $(this).parent().children("span");
+        var c = $(this).attr("class");
+        var value = parseInt(c[c.length-1]) + 1;
+        stellaCliccata_A(list, value);
+        //Aggiorno il valore
+        $(this).siblings("input[type=hidden]").val(value);
     });
     
     //--------------------------------------------------------------------------------------------
@@ -579,7 +545,7 @@ $(document).ready(function(){
 
         var r = $.ajax({
             type: "POST",
-            url: "http://127.0.0.1:8888/confermaRichiesta",
+            url: "/confermaRichiesta",
             dataType: "json",
             data: {"id":id,"ospitato":ospitato} //localStorage.utente.username
         });
@@ -587,12 +553,14 @@ $(document).ready(function(){
         r.done(function(msg){
             alert(JSON.stringify(msg));
             $(t).parent().parent().parent().remove();
+            aggiungiNotifica(nuovaNotificaMessaggio("L'offerta è stata confermata"),"successo");
             creaBoxOffertaAccettata(msg.id,offerteInCuiUtentePresente[msg.id],"Ospitante");
             creaBoxRecensioneDaFare(msg.id,offerteInCuiUtentePresente[msg.id],"Ospitante");
         });
     
         r.fail(function(err){
-            alert(JSON.stringify(err));
+            console.log(JSON.stringify(err));
+            aggiungiNotifica(nuovaNotificaMessaggio("C'è stato un errore nella conferma della richiesta"),"errore");
         });
     });
 
@@ -603,9 +571,9 @@ $(document).ready(function(){
         var t = this;
         var id = $(t).siblings("input[type=hidden]").val();
 
-        var persona = $(t).siblings(".recensione-da-fare-altro").text();
-        var titolo = $(t).siblings("#recensione-da-fare-testo").val();
-        var stelle = $(t).siblings("#recensione-da-fare-stelle").val();
+        //var persona = $(t).siblings(".recensione-da-fare-altro").text();
+        var titolo = $(t).siblings(".recensione-da-fare-testo").children("input[type=text]").val();
+        var stelle = $(t).siblings(".contenitore-stelle").children("input[type=hidden]").val();
         var params = {"id":id,"recensione": {"titolo":titolo,"numStelle":stelle}};
         if($(t).siblings("#ifOspitante").val() === "Eri Ospitato"){
             params.ruolo = "ospitato";
@@ -614,22 +582,81 @@ $(document).ready(function(){
             params.ruolo = "ospitante";
         }
 
+        console.log(JSON.stringify(params));
 
         var r = $.ajax({
             type: "POST",
-            url: "http://127.0.0.1:8888/inviaRecensione",
+            url: "/inviaRecensione",
             dataType: "json",
             data: params
         });
     
         r.done(function(msg){
-            alert(JSON.stringify(msg));
+            console.log("Recensione inviata con successo: " + JSON.stringify(msg));
+            aggiungiNotifica(nuovaNotificaMessaggio("La recensione è stata inviata con successo"),"successo");
             $(t).closest("div").remove();
         });
     
         r.fail(function(err){
-            alert(JSON.stringify(err));
+            aggiungiNotifica(nuovaNotificaMessaggio("Errore nell'invio delle recensione"),"errore");
         });
+    });
+
+    //--------------------------------------------------------------------------------------------
+
+
+    //Crea offerta
+    $("#creaOfferta").click(function(){
+
+        var homeTeam = $("#nuova-offerta select[name=selPartitaHome]").val();
+        var awayTeam = $("#nuova-offerta select[name=selPartitaAway]").val();
+        console.log(stringPartita(homeTeam,awayTeam));
+        if(homeTeam === "null"){
+            aggiungiNotifica(nuovaNotificaMessaggio("La squadra di casa deve essere selezionata","errore"));
+            return;
+        }
+        else if(awayTeam === "null"){
+            aggiungiNotifica(nuovaNotificaMessaggio("La squadra in trasferta deve essere selzionata","errore"));
+            return;
+        }
+
+        var offerta = {
+            "homeTeam": homeTeam,
+            "awayTeam": awayTeam
+        };
+
+        var c = $.ajax({
+           type: "POST",
+           url: "/aggiungiOfferta",
+           dataType: "json",
+           data: offerta
+        });
+
+        c.done(function(msg) {
+            if(msg.ok === true){
+                console.log("Offerta inserita");
+                var offerta = [{
+                    "id": msg.id,
+                    "value": {
+                        "_id": msg.id,
+                        "homeTeam": homeTeam,
+                        "awayTeam": awayTeam,
+                        "codaRichieste": []
+                    }
+                }];
+                aggiungiNotifica(nuovaNotificaMessaggio("L'offerta è stata inserita con successo","successo"));
+                inserisciOspitiDaAccettare(offerta);
+            }
+            else{
+                aggiungiNotifica(nuovaNotificaMessaggio("Errore nell'inserimento dell'offerta","errore"));
+                console.log("Errore nell'inserimento dell'offerta");
+            }
+        });
+    
+        c.fail(function(err){
+            alert("Errore nell'inserimento dell'offerta " + JSON.stringify(err));
+        });
+    
     });
 
 
@@ -706,6 +733,50 @@ $(document).ready(function(){
     $(".nav-bar-top a").click(function(){
         //aggiungiNotifica(nuovaNotifica("inter - napoli","pinco pallino","ha fatto una richiesta"));
         changePage(this.id);
+    });
+
+}
+
+
+
+/*******************************************************************
+ * MAIN                                                            *
+ *******************************************************************/
+
+$(document).ready(function(){
+    getSquadre();
+    getPartite();
+    caricaMain();
+
+    /*******************************************************************
+     * GESTIONE WEBSOCKET                                              *
+     *******************************************************************/
+
+    var socket = io();
+
+    socket.on('messaggio', function(msg){
+        console.log("Hai ricevuto un messaggio");
+        var id = msg.id;
+        var ruolo = msg.ruolo;
+        var username = msg.mittente;
+        var partita = msg.partita;
+        //var ruolo = $("input[value=" + id + "]").siblings(".ruolo").text();
+        //var username = $("input[value=" + id + "]").siblings(".username").text();
+        //var partita = $("input[value=" + id + "]").siblings(".partita").text();
+        if(username !== JSON.parse(localStorage.utente).username){
+            if($("#" + id + "-chat").length === 0){
+                var not = nuovaNotifica(partita,username,"ti ha inviato un messaggio");
+                aggiungiNotifica(not);
+            }
+            else if($("#" + id + "-chat").css("display") === "none"){
+                inserisciMessaggio(id,msg.messaggio,ruolo);
+                var not = nuovaNotifica(partita,username);
+                aggiungiNotifica(not);
+            }
+            else if($("#" + id + "-chat").length !== 0){
+                inserisciMessaggio(id,msg.messaggio,ruolo);
+            }
+        }
     });
 
  });
