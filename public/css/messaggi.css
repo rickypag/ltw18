@@ -1,0 +1,83 @@
+.sidenav {
+    height: 100vh;
+    width: 25vw;
+    position: fixed;
+    z-index: 1;
+    top: 50px;
+    left: 0;
+    background-color: yellow;
+    overflow-x: hidden;
+}
+
+.sidenav-entry {
+    border-style: solid;
+    height: auto;
+}
+  
+  .sidenav a {
+    padding: 6px 8px 6px 16px;
+    text-decoration: none;
+    font-size: 18px;
+    display: block;
+  }
+  
+  .sidenav a:hover {
+    color: #f1f1f1;
+  }
+  
+  
+.box-messaggi {
+    margin-left: 25vw; /* Same as the width of the sidenav */
+    font-size: 28px; /* Increased text to enable scrolling */
+    top: 50px;
+    position: fixed;
+    overflow: auto;
+    height: 80vh;
+    width: 75vw;
+    bottom: 50px;
+    padding: 0;
+    display: none;
+}
+
+.box-messaggi div {
+    width: 100%;
+}
+
+.box-messaggi .altro {
+    text-align: left;
+}
+
+.box-messaggi .mio {
+    text-align: right;
+}
+
+.box-messaggi label {
+    border-radius: 10px;
+    padding: 0 30px;
+}
+
+.box-messaggi .altro label{
+    background-color: wheat;
+}
+
+.box-messaggi .mio label{
+    background-color: gold;
+}
+
+.invia-messaggio {
+    margin-left: 25vw;
+    margin-bottom: 0px;
+    position: fixed;
+    bottom: 0px;
+    height: 50px;
+    background-color: yellow;
+    width: 100%;
+}
+
+.invia-messaggio input {
+    width: 65vw
+}
+
+.invia-messaggio a {
+    width: 8vw
+}

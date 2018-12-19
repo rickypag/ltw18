@@ -1,0 +1,240 @@
+.button {
+    padding: 10px 10px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    background-color: rgba(100, 148, 237, 0.616);
+    border: 1px solid black;
+    border-radius: 4px;
+    
+    font-family: Georgia;
+    font-style: italic;
+    font-size: 15px;
+    font-weight: bold;
+}
+
+.button:hover{
+    text-decoration: none;
+    color: whitesmoke;
+    background-color: rgba(100, 148, 237, 0.850);
+}
+
+.button.active{
+    background-color:white;
+}
+
+.bt-ospita{
+    background-image: url("../images/letto.jpg");
+    background-size: 100%;
+    color: blue;
+}
+
+.bt-ospita:hover{
+    color:rgba(0, 0, 255, 0.700);
+}
+
+.form{
+    font-family: Georgia;
+    font-style: italic;
+    font-size: 30px;
+    font-weight: bold;
+
+    background-color: rgba(245, 245, 245, 0.616);
+    text-align: center;
+}
+
+.box-offerta{
+    font-family: Georgia;
+    font-style: italic;
+    font-size: 30px;
+    font-weight: bold;
+    border-radius: 5px;
+
+    width: 800px;
+    margin: 10px auto;
+    padding: 10px;
+    background-color: rgba(245, 245, 245, 0.616);
+    text-align: center;
+}
+
+.div-offerta-da-accettare{
+    font-family: Georgia;
+    font-style: italic;
+    font-size: 30px;
+    font-weight: bold;
+
+    width: 400px;
+    margin: 10px auto;
+    padding: 10px;
+    background-repeat: no-repeat;
+    background-size: 100%;
+    background-color: #cccccc;
+    background-position: center;
+    text-align: center;
+}
+
+body {
+    background-image: url("../images/imgHome1.jpg");
+    background-color: #cccccc;
+    height: 100%;
+    width: 100%;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    position: relative;
+    background-attachment: fixed;
+  }
+
+.offerta-da-accettare-ospite{
+    background-position: center;
+    font-style: normal;
+    font-size: 18px;
+}
+
+.label{
+    /*height: auto;*/
+    display: inline-block;
+    text-align: center;
+    background-color: orange;
+    border: 1px solid black;
+    border-radius: 4px;
+
+    font-size: 40px;
+    font-family: Courier 'Courier New', Courier, monospace;
+    font-weight: bold;
+
+}
+
+input[type=text] {
+    width: 600px;
+}
+
+/*stelle*/
+.checked {
+    color: orange;
+}
+
+.page {
+    padding-top: 40px;
+}
+
+#homePage {
+    margin: 30px 0;
+    text-align: center;
+}
+
+
+/*NAV BAR TOP*/
+
+.nav-bar-top {
+    height: 50px;
+    width: 100%;
+    position: fixed;
+    z-index: 1;
+    top: 0;
+    left: 0;
+    background-color: #111;
+    overflow-x: hidden;
+}
+
+.nav-bar-top a{
+    text-decoration: none;
+    font-size: 25px;
+    color: #818181;
+
+}
+
+#div-recensione-esempio {
+    display: none;
+}
+
+#div-offerta-da-accettare-esempio {
+    display: none;
+}
+
+#div-offerte-accettate-esempio {
+    display: none;
+}
+
+#schermata-caricamento {
+    position: fixed; /* Sit on top of the page content */
+    width: 100%; /* Full width (cover the whole page) */
+    height: 100%; /* Full height (cover the whole page) */
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0,0,0,0.65); /* Black background with opacity */
+    z-index: 2; /* Specify a stack order in case you're using a different order for other elements */
+  }
+
+/*Sfondo elementi*/
+.recensione-da-fare-tipologia{
+    background-position: center;
+    font-style: normal;
+    font-size: 24px;
+}
+
+.ifOspitanteImg{
+    padding: 1px 15px;
+    background-image: url("../images/home.png");
+    background-repeat: no-repeat;
+    background-size: 100%;
+}
+
+.ifOspiteImg{
+    padding: 2px 20px;
+    background-image: url("../images/away.png");
+    background-repeat: no-repeat;
+    background-size: 100%;
+}
+
+.div-recensione{
+    background-color: #cccccc;
+    background-image: url("../images/recensione.png");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 43%;
+}
+
+.recensione-nome-utente{
+    background-position: center;
+    font-style: normal;
+    font-size: 18px;
+}
+
+.wrapper {
+    background-color: rgba(218, 190, 64, 0.500);
+    padding: 20px 0;
+    margin: 20px 0;
+    border-radius: 5px;
+    border-style: solid;
+    border-color: rgb(105, 89, 17)
+}
+
+/*NOTIFICHE*/
+
+.notification {
+    position: fixed;
+    display: none; /* Hidden by default */
+    height: 100px;
+    width: 300px;
+    border-style: solid;
+    left: calc(100vw - 300px - 30px);
+    background-color: blueviolet;
+    z-index: 3; /* Specify a stack order in case you're using a different order for other elements */
+}
+
+.errore{
+    background-color: red;
+    color: #5B1311;
+}
+
+.successo{
+    background-color: green;
+    color: #01370D;
+}
+
+#notifications {
+    background-color: coral;
+}
