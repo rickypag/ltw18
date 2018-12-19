@@ -2,31 +2,31 @@
     <head>
         <title>Registrati</title>
         <meta charset="utf-8"/>
-        <link href="css/bootstrap.min.css" rel="stylesheet"/>
-        <link href="css/signup.css" rel="stylesheet"/>
+        <link href="public/css/bootstrap.min.css" rel="stylesheet"/> <!--CAMBIARE PERCORSO-->
+        <link href="public/css/signup.css" rel="stylesheet"/> <!--CAMBIARE PERCORSO-->
 		</script>
         <script type="text/javascript" lang="javascript" src="js/signupScript.js"></script>
     </head>
     <body class="text-center">
         <form action="/signup" class="form-signin" method="POST" name="myForm" onSubmit="return validaForm()">
-            <h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>
+            <h1 class="h3 mb-3 font-weight-normal">Registrati</h1>
             Username*:
             <input type="text" name="username" class="form-control" placeholder="Username" required autofocus/>
 
             Nome*:
-            <input type="text" name="nome" class="form-control" placeholder="Name" required/>
+            <input type="text" name="nome" class="form-control" placeholder="Nome" required/>
 
             Cognome*:
-            <input type="text" name="cognome" class="form-control" placeholder="Last Name" required/>
+            <input type="text" name="cognome" class="form-control" placeholder="Cognome" required/>
 
             Email*:
-            <input type="email" name="email" class="form-control" placeholder="Email address" required/>
+            <input type="email" name="email" class="form-control" placeholder="mario@rossi.it" required/>
 
             Password*:
             <input type="password" name="password" class="form-control" placeholder="Password" onchange="form.repeatPassword.pattern = RegExp.escape(this.value);" required/>
 
             Ripeti Password*:
-            <input type="password" id="repeatPassword" name="repeatPassword" onkeyup="checkPassword()" class="form-control" required/>
+            <input type="password" id="repeatPassword" name="repeatPassword" placeholder="Ripeti Password" onkeyup="checkPassword()" class="form-control" required/>
 
             Sesso:
             <input type="radio" name="sesso" value="M" /> M
@@ -34,8 +34,9 @@
             <br>
             Data di nascita*:
             <input id="dataNascita" type="date" class="form-control" onchange="checkAge()" name="dataNascita" required>
-
-            <button name="registrationButton" class="btn btn-lg btn-primary btn-block" type="submit">Register</button>
+            (I campi con * sono obbligatori)
+            <br>
+            <button name="registrationButton" class="btn btn-lg btn-primary btn-block" type="submit">Registrati</button>
             <a href="login">Torna al login</a>
         </form>        
     </body>
