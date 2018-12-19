@@ -11,17 +11,13 @@
         <script type="text/javascript" lang="javascript" src="js/loginScript.js"></script>
     </head>
     <body class="text-center">
-        <form action="/login" class="form-signin fail" method="POST" name="myForm" onSubmit="return validaForm()">
+        <form class="form-signin" name="myForm fail">
             <img class="mb-4" src="images/logo.png" alt="" width="72" height="72"/>
             
-            <h1 class="h3 mb-3 font-weight-normal">Accedi</h1>
-            
-            <input type="text" name="username" class="form-control" placeholder="Username" required autofocus/>
-            
-            <input type="password" name="password" class="form-control" placeholder="Password" required/>
+            <h1 class="h3 mb-3 font-weight-normal">ATTENZIONE!</h1>
+            <h2 class="h3 mb-3 font-weight-normal">Il login non è andato a buon fine</h2>
 
-            <button class="btn btn-lg btn-primary btn-block" type="submit">Invio</button>
-            
+            <a href="/login">Ritenta</a><br>
             <a href="/signup">Non sei ancora registrato?</a>
         </form>
     </body>

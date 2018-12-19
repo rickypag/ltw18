@@ -39,7 +39,7 @@ function checkAge(){
 
 function checkPassword(){
     if(document.myForm.password.value != document.myForm.repeatPassword.value) {
-        document.myForm.repeatPassword.setCustomValidity("Passwords Don't Match");
+        document.myForm.repeatPassword.setCustomValidity("Le password non combaciano");
         //Fare sfondo rosso
         //document.myForm.repeatPassword.background = "red";
         document.myForm.repeatPassword.style.backgroundColor = "#f27f83";

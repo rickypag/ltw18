@@ -2,7 +2,7 @@
  .tab {
     overflow: hidden;
     border: 1px solid white;
-    background-color: #cccccc5d;
+    background-color: rgb(170, 158, 158, 0.8);
 }
  
 .info{
@@ -15,16 +15,27 @@
     padding: 6px 12px;
     border: 1px solid #ccc;
     border-top: none;
-    background-color: #cccccc5d;
+    background-color: rgb(170, 158, 158, 0.8);
 }
 
- 
-.titoloRec{
+.box-rec{
+    border-bottom-style: solid;
+    border-color: black;
     color: black;
+    font-size: 40px;
+}
+ 
+.titoloRec{ 
+    text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
+    color: white;
 }
  
 .valore{
     color: darkblue;
+}
+
+.utente-info.utente-rec {
+    font-size: 40px;
 }
  
  

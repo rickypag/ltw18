@@ -6,8 +6,8 @@ function scegliPersonaAltra(nome, cognome, squadra, numOfferte, numVolteOspitato
     document.getElementById("numOfferteProfiloAltro").innerHTML = numOfferte;
     document.getElementById("numVolteOspitatoProfiloAltro").innerHTML = numVolteOspitato;
 
-    $("#mediaRecensioniAltro").children("span").remove();
-    $(creaStelle(mediaRec)).appendTo("#mediaRecensioniAltro");
+    $("#mediaRecensioniProfiloAltro").empty();
+    $(creaStelle(mediaRec)).appendTo("#mediaRecensioniProfiloAltro");
 }
 
 
@@ -27,9 +27,14 @@ function getRecensioni(username,utente) {
         for(var i=0;i < msg.rows.length;i++){
             offerteUtente.push(msg.rows[i].value);
         }
+        $("#profiloAltro")[0].click();
+        $(".tabcontent").empty();
+        button = document.getElementsByClassName("btn-profilo");
+        for (i = 0; i < button.length; i++) {
+            button[i].className = button[i].className.replace(" active", "");
+        }
         var recensioni = getInfoRecensioniPerProfilo(username, offerteUtente);
         scegliPersonaAltra(utente.nome, utente.cognome, utente.squadra, recensioni[0], recensioni[1], recensioni[2]);
-        $("#profiloAltro")[0].click();
         console.log("Offerte utente caricate");
     });
 

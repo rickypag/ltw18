@@ -1,7 +1,7 @@
 <!doctype html>
 <html>
     <head>
-        <title>Profilo</title>
+        <title>FootballFriends-home</title>
         
         <link href="../css/profilo.css" rel="stylesheet"/>
         <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
@@ -15,10 +15,10 @@
         
         <table class="tab" width="100%">
             <td width="200" height="250">
-                <div><img id="imgProfProfiloMod" src="../images/anonimo.jpg" onabort="" width="200" height="250"></div>
+                <div><img id="imgProfProfiloMod" src="../images/anonimo.jpg" width="200" height="250"></div>
             </td>
             <td>
-                <form name ="infoUtente" method="POST" action="/aggiornaProfilo">
+                <form name="infoUtente" method="POST" action="/aggiornaProfilo">
                     <div class="info">Nome: <input required type="text" id="nomeProfilo" name="nome"></div>
                     <div class="info">Cognome: <input required type="text" id="cognomeProfilo" name="cognome"></div>
                     <div class="info">Squadra: <select id="squadraProfilo" name="squadra"><option value="null">---</option></select></div>

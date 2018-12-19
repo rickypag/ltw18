@@ -76,11 +76,6 @@ app.use(sessionMiddleware);
 
 var sess;
 
-/*******************************************************************
- * RICHIESTE                                                       *
- *******************************************************************/
-
-
 /*************************************************************************************** 
  * WEB SOCKET                                                                          *
  ***************************************************************************************/
@@ -263,11 +258,12 @@ app.post('/login', function(req,res){
                 window.location.replace("/utente/main.html");</script></html>');
             }
             else{
-                res.send("autenticazione fallita!");
+                console.log("[*] Un utente non si è autenticato");
+                res.sendfile(_dir + "/loginfailed.html");
             }
         }).catch((err) => {
             console.log(err);
-            res.send("Errore Database!");
+            res.sendfile(_dir + "/loginfailed.html");
         });
     }
     else{
@@ -280,31 +276,41 @@ app.post('/signup', function(req,res){
     var username = req.body.username;
     var email = req.body.email;
 
-    utenti.view('tmp', 'check_email_user', {keys: [email, username]}).then((response) => {
+    utenti.view('tmp', 'check_email', {keys: [email]}).then((response) => {
         if(response.rows.length == 0){
-            var data = {
-                username: req.body.username,
-                nome: req.body.nome,
-                cognome: req.body.cognome,
-                email: req.body.email,
-                password: req.body.password,
-                dataNascita: req.body.dataNascita,
-                squadra: ""
-            };
+            utenti.view('tmp', 'check_username', {keys: [username]}).then((response) => {
+                if(response.rows.length == 0){
+                    var data = {
+                        username: req.body.username,
+                        nome: req.body.nome,
+                        cognome: req.body.cognome,
+                        email: req.body.email,
+                        password: req.body.password,
+                        dataNascita: req.body.dataNascita,
+                        squadra: ""
+                    };
+                    
+                    if(req.body.sesso){
+                        data.sesso = req.body.sesso;
+                    }
             
-            if(req.body.sesso){
-                data.sesso = req.body.sesso;
-            }
-    
-            utenti.insert(data).then((response) => {
-                res.redirect("/login");
+                    utenti.insert(data).then((response) => {
+                        res.redirect("/login");
+                    }).catch((err) => {
+                        console.log(err);
+                        res.send("Errore Database!");
+                    });
+                }
+                else{
+                    res.sendfile(_dir + '/usernameexists.html');
+                }
             }).catch((err) => {
                 console.log(err);
                 res.send("Errore Database!");
             });
         }
         else{
-            res.redirect('/signup');
+            res.sendfile(_dir + '/emailexists.html');
         }
     }).catch((err) => {
         console.log(err);

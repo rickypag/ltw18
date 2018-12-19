@@ -18,9 +18,9 @@ ws.onmessage = function (ev) {
 //Cambio la chat
 function changeChat(id){
     $(".box-messaggi").css('display','none');
-    $(".sidenav-entry").css('background-color','yellow');
+    $(".sidenav-entry").css('background-color','white');
     $("#" + id + "-chat").css('display','block');
-    $("input[value=" + id + "]").parent().css('background-color','white');
+    $("input[value=" + id + "]").parent().css('background-color','coral');
     idChatSelected = id;
     var box = document.getElementById(id + "-chat");
     box.scrollTop = box.scrollHeight;
@@ -138,9 +138,11 @@ $(".invia-messaggio [name=messaggio]").on({
 });
 
 $(".sidenav").on("click",".sidenav-entry",function(){
+    $(this).css("background-color","yellow");
     var id = $(this).children("[type=hidden]").val();
     var ruolo = $(this).children(".ruolo").text();
-    if(!$("#" + id + "-chat").length){
+    console.log(id);
+    if(!$("#" + id + "hat").length){
         $(creaBoxMessaggi(id)).appendTo(".div-box-messaggi");
         getMessaggiById(id,ruolo);
     }
@@ -148,19 +150,3 @@ $(".sidenav").on("click",".sidenav-entry",function(){
         changeChat(id);
     }
 });
-
-
-/*socket.on('messaggio', function(msg){
-    var id = msg.id;
-    var ruolo = $("input[value=" + id + "]").siblings(".ruolo").text();
-    var username = $("input[value=" + id + "]").siblings(".username").text();
-    var partita = $("input[value=" + id + "]").siblings(".partita").text();
-    if($("#" + id + "-chat").length === 0 || $("#" + id + "-chat").css("display") === "none"){
-        inserisciMessaggio(id,msg.messaggio,ruolo);
-        var not = nuovaNotifica(partita,username);
-        aggiungiNotifica(not);
-    }
-    else if($("#" + id + "-chat").length === 0){
-        inserisciMessaggio(id,msg.messaggio,ruolo);
-    }
-});*/

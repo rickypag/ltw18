@@ -1,23 +1,26 @@
+<!doctype html>
 <html>
     <head>
+        <titolo>FootballFriends-home</titolo>
+        <link rel="shortcut icon" href="../images/favicon.ico" />
         <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
         <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
-        <link href="../css/homepage.css" rel="stylesheet"/>
         <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
         <script type="text/javascript" lang="javascript" src="../js/main.js"></script>
         <script type="text/javascript" lang="javascript" src="../js/profiloAltro.js"></script>
-        <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
-        <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
         <script src="../js/socket.io-client/dist/socket.io.js"></script>
         <link href="../css/notify.css" rel="stylesheet"/>
         <link href="../css/profilo.css" rel="stylesheet"/>
         <link href="../css/bootstrap.min.css" rel="stylesheet"/>
+        <link href="../css/homepage.css" rel="stylesheet"/>
+        <link href="../css/loader.css" rel="stylesheet"/>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     </head>
     <body>
 
         <div id="schermata-caricamento">
-            
+            <div class="loader"></div>
+            <div>In attesa del caricamento della dashboard</div>
         </div>
 
         <nav class="nav-bar-top">
@@ -35,8 +38,8 @@
                         <div>Hai a disposizione un letto per ospitare qualcuno in trasferta?</div>
                         <div>Fallo sapere a chi ne ha bisogno!</div>
                         <div>
-                            <select id="selPartitaHome" name="selPartitaHome" class="selPartita home"><option value="null">---</option></select>
-                            <select id="selPartitaAway" name="selPartitaAway" class="selPartita away"><option value="null">Non ci sono partite disponibili</option></select>
+                            <select id="selPartitaHome" name="selPartitaHome" class="selPartita home"><option value="null">Squadra di casa</option></select>
+                            <select id="selPartitaAway" name="selPartitaAway" class="selPartita away"><option value="null">Squadra ospite</option></select>
                         </div>
                         <a id="creaOfferta" class="button buttonNuovaOfferta">crea offerta</a>
                     </form>
@@ -59,7 +62,7 @@
                                     <div class="offerta-da-accettare-ospite"><label class="utente-info">PincoPanco</label>
                                     <a class="button bt-ospita" id="button-offerta-da-accettare">Ospita</a>
                                     </div>
-                                    <div class="offerta-da-accettare-ospite">PancoPinco
+                                    <div class="offerta-da-accettare-ospite"><label class="utente-info">PancoPinco</label>
                                     <a class="button bt-ospita" id="button-offerta-da-accettare">Ospita</a>
                                     </div>
                                 </div>
@@ -97,11 +100,11 @@
                                 </div>
                                 <a class="contenitore-stelle">
                                     <input type="hidden" name="numStelle" value="1" />
-                                    <span class="fa fa-star checked stella0"></span>
-                                    <span class="fa fa-star stella1" ></span>
-                                    <span class="fa fa-star stella2" ></span>
-                                    <span class="fa fa-star stella3" ></span>
-                                    <span class="fa fa-star stella4" ></span>
+                                    <span class="fa fa-star checked cliccabile stella0"></span>
+                                    <span class="fa fa-star cliccabile stella1" ></span>
+                                    <span class="fa fa-star cliccabile stella2" ></span>
+                                    <span class="fa fa-star cliccabile stella3" ></span>
+                                    <span class="fa fa-star cliccabile stella4" ></span>
                                 </a>
                                 <a class="button" id="button-inserisci-recensione">Invia</a>
                             </div>

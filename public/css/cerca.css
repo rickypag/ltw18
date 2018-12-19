@@ -32,21 +32,19 @@
     left: 50%;
     transform: translate(-50%, -50%);
     width: 100%;
-    top: 75px
+    top: 25px
 }
 
 .back-div {
     text-align: center;
     position: relative;
     width: 100%;
-    top: 50px
 }
-
-
 
 /*Stile elementi sotto la barra di navigazione*/
 .elements{
     text-align: center;
-    padding-top: 50px
+    padding-top: 5px
 }
+
 

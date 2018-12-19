@@ -263,7 +263,6 @@ $(document).ready(function(){
         });
 
         c.done(function(msg) {
-            alert(JSON.stringify(msg));
             $(t).parent().parent().remove();
             aggiungiNotifica(nuovaNotificaMessaggio("La richiesta è stata inoltrata"),"successo");
             changePage("home");

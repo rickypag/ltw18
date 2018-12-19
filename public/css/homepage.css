@@ -7,10 +7,15 @@
     border: 1px solid black;
     border-radius: 4px;
     
+    cursor: pointer;
+
     font-family: Georgia;
     font-style: italic;
     font-size: 15px;
     font-weight: bold;
+
+    text-shadow: none;
+    color: black;
 }
 
 .button:hover{
@@ -55,6 +60,8 @@
     padding: 10px;
     background-color: rgba(245, 245, 245, 0.616);
     text-align: center;
+
+    text-transform: capitalize;
 }
 
 .div-offerta-da-accettare{
@@ -83,6 +90,8 @@ body {
     background-size: cover;
     position: relative;
     background-attachment: fixed;
+    overflow-y: hidden;
+    overflow-x: hidden;
   }
 
 .offerta-da-accettare-ospite{
@@ -110,6 +119,11 @@ input[type=text] {
 }
 
 /*stelle*/
+
+.cliccabile{
+    cursor: pointer;
+}
+
 .checked {
     color: orange;
 }
@@ -123,6 +137,11 @@ input[type=text] {
     text-align: center;
 }
 
+#squadre {
+    text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
+    color: white;
+    font-size: 30px;
+}
 
 /*NAV BAR TOP*/
 
@@ -144,6 +163,10 @@ input[type=text] {
 
 }
 
+.nav-bar-top a:hover {
+    color:white;
+}
+
 #div-recensione-esempio {
     display: none;
 }
@@ -156,24 +179,25 @@ input[type=text] {
     display: none;
 }
 
-#schermata-caricamento {
-    position: fixed; /* Sit on top of the page content */
-    width: 100%; /* Full width (cover the whole page) */
-    height: 100%; /* Full height (cover the whole page) */
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0,0,0,0.65); /* Black background with opacity */
-    z-index: 2; /* Specify a stack order in case you're using a different order for other elements */
-  }
-
 /*Sfondo elementi*/
 .recensione-da-fare-tipologia{
     background-position: center;
     font-style: normal;
     font-size: 24px;
 }
+
+.utente-info{
+    font-size: 27px;
+    font-style: normal;
+    cursor: pointer;
+    text-transform: none;
+
+}
+
+.utente-info:hover{
+    color: white;
+}
+
 
 .ifOspitanteImg{
     padding: 1px 15px;
@@ -202,6 +226,8 @@ input[type=text] {
     font-style: normal;
     font-size: 18px;
 }
+
+
 
 .wrapper {
     background-color: rgba(218, 190, 64, 0.500);

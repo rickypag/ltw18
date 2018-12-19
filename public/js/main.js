@@ -188,7 +188,7 @@ function appendRecensioni(type, tipoProfilo){
  
 //Crea una recensione dall'oggetto recensione in input
 function creaRecensione(recensione, autore){
-    var newRecensione='<a class="titoloRec" >'+recensione.titolo+' '+'</a>'+'  Autore: '+autore+'  '+creaStelle(recensione.numstelle);
+    var newRecensione='<div class="box-rec"><a class="titoloRec" >'+recensione.titolo+' '+'</a>'+'       Autore: <label class="utente-info utente-rec">'+autore+'</label>  '+creaStelle(recensione.numstelle) + '</div';
     return newRecensione;
 }
  
@@ -204,7 +204,7 @@ function creaStelle(val){
 
 //Mette quante offerte hai fatto e la media delle recensioni nel tuo profilo
 function getInfoRecensioniPerProfilo(id,li){
-    var listaContatori= [0,0,0]; //[numOfferte, numVolteOspitato, mediaRecensioni]
+    var listaContatori= [0,0,1]; //[numOfferte, numVolteOspitato, mediaRecensioni]
     var listaEventi = li;
     var contatore = 0;
     var somma = 0;
@@ -215,7 +215,6 @@ function getInfoRecensioniPerProfilo(id,li){
             somma+=parseInt(listaEventi[i].recensioneFattaDaOspitato.numstelle);
         }
         if(listaEventi[i].ospitato == id && listaEventi[i].recensioneFattaDaOspitante){
-            console.log(JSON.stringify(listaEventi[i]));
             listaContatori[1]+=1;
             contatore++;
             somma+= parseInt(listaEventi[i].recensioneFattaDaOspitante.numstelle);
@@ -240,7 +239,8 @@ function iniziaProgramma(){
     if(countCaricamento === 0){
         //Una volta che ho caricato tutti gli elementi gli associo i gestori di eventi
         eventsHandler();
-        $("#schermata-caricamento").css("display","none");
+        $("#schermata-caricamento").remove();
+        $("body").css("overflow-y","scroll");
         console.log("Tutto a posto");
     }
 }
@@ -414,26 +414,12 @@ function inserisciOspitiDaAccettare(listaOfferte){
             creaWrapperPerOfferta(listaOfferte[i].value);
         }
 
-        //Altrimenti carico le eventuali nuove richieste
-        /*else{
-            for(var j=0;j < listaOfferte[i].value.codaRichieste.length;j++){
-                var usernameRichiedente = listaOfferte[i].value.codaRichieste[j];
-                if(!(offerteInCuiUtentePresente[docId].codaRichieste).includes(usernameRichiedente)){
-                    toAppend = creaBoxRichiesta(docId,[usernameRichiedente]);
-                    $(toAppend).appendTo("#" + docId);
-                }
-            }
-        }*/
     }
 }
 
 //Data un'offerta di cui l'utente è ospitante creo il box che contiene i form con le richieste di altri utenti
 //Nel caso in cui non ci siano richieste il wrapper contiene un messaggio "Non ci sono richieste per questa offerta"
 function creaWrapperPerOfferta(offerta){
-    /*var toAppend = '<div id="' + offerta._id + '" class="box-offerta div-offerta-da-accettare">' + stringPartita(offerta.homeTeam,offerta.awayTeam);
-    toAppend += '<input id="offerta-da-accettare-id" type="hidden" value="' + offerta._id + '" >';
-    toAppend += creaBoxRichiesta(offerta._id,offerta.codaRichieste);
-    toAppend += '</div>';*/
     var nuovaOfferta = $(".div-offerta-da-accettare:first").clone();
     nuovaOfferta.children(".offerta-da-accettare-partita").text(stringPartita(offerta.homeTeam,offerta.awayTeam));
     nuovaOfferta.children(".offerta-da-accettare-id").val(offerta._id);
@@ -492,22 +478,20 @@ function creaBoxRecensioneDaFare(id,recensione,ifOspitato){
     if(ifOspitato === "Ospitato") altroUtente = recensione.ospitante;
     else altroUtente = recensione.ospitato;
 
-    /*var toAppend = '<div class="box-offerta div-offerta-da-accettare">' + stringPartita(recensione.homeTeam,recensione.awayTeam);
-    toAppend += '<input id="recensione-da-fare-id" type="hidden" value="' + recensione._id + '" >';
-    toAppend += '<div class="tipologia">' + ifOspitato + '</div>';
-    toAppend += '<div class="recensione-da-fare-altro-utente">' + altroUtente + '</div>';
-    toAppend += '<input id="recensione-da-fare-testo" type="text">';
-    toAppend += '<input id="recensione-da-fare-stelle" type="numeric">';
-    toAppend += '<a class="button" id="button-inserisci-recensione">Invia</a>';
-    toAppend += '</div>';*/
+    console.log(altroUtente);
 
     var nuovaRecensione = $(".div-recensione:first").clone();
     nuovaRecensione.children(".recensione-da-fare-partita").text(stringPartita(recensione.homeTeam,recensione.awayTeam));
     nuovaRecensione.children(".recensione-da-fare-id").val(recensione._id);
-    nuovaRecensione.children(".recensione-da-fare-tipologia").text(ifOspitato);
+    if(ifOspitato === "Ospitante"){
+        nuovaRecensione.children(".recensione-da-fare-tipologia").text("Hai ospitato:");
+    }
+    else{
+        nuovaRecensione.children(".recensione-da-fare-tipologia").text("Sei stato ospitato da:");
+    }
     nuovaRecensione.children(".recensione-da-fare-altro").text(altroUtente);
-    //nuovaRecensione.children(".recensione-da-fare-tipologia").children("a").addClass("if" + ifOspitato + "img");
-
+    nuovaRecensione.children(".recensione-da-fare-tipologia").children("a").addClass("if" + ifOspitato + "img");
+    console.log(nuovaRecensione.html());
     $(nuovaRecensione).appendTo("#recensioni-da-fare");
 }
 
@@ -543,7 +527,12 @@ function creaBoxOffertaAccettata(id,offerta,ifOspitato){
     var nuovaOffertaAccettata = $(".div-offerta-accettata:first").clone();
     nuovaOffertaAccettata.children(".offerta-accettata-partita").text(stringPartita(offerta.homeTeam,offerta.awayTeam));
     nuovaOffertaAccettata.children(".offerta-accettata-id").val(offerta._id);
-    nuovaOffertaAccettata.children(".offerta-accettata-tipologia").text(ifOspitato);
+    if(ifOspitato === "Ospitante"){
+        nuovaOffertaAccettata.children(".offerta-accettata-tipologia").text("Hai ospitato:");
+    }
+    else{
+        nuovaOffertaAccettata.children(".offerta-accettata-tipologia").text("Sei stato ospitato da:");
+    }
     nuovaOffertaAccettata.children(".offerta-accettata-altro").text(altroUtente);
 
     $(nuovaOffertaAccettata).appendTo("#offerte-accettate");
@@ -618,6 +607,9 @@ function controllaCambiamenti(listaOfferte){
         if(oldLen < newLen){
             for(var j=oldLen;j < newLen;j++){
                 offerteInCuiUtentePresente[offerta._id].codaRichieste.push(offerta.codaRichieste[j]);
+                if(oldLen === 0){
+                    $("input[value=" + offerta._id + "]").siblings(".offerta-da-accettare-ospiti").empty();
+                }
                 var boxRichieste = $("input[value=" + offerta._id + "]").siblings(".offerta-da-accettare-ospiti");
                 inserisciRichiesta(boxRichieste,offerta._id,offerta.codaRichieste[j]);
                 //Notifico l'aggiornamento
@@ -647,7 +639,7 @@ function eventsHandler(){
     //--------------------------------------------------------------------------------------------
     
     //Quando clicco una stella evidenzio le stelle per quella recensione
-    $(".div-recensione").on("click","span",function() {
+    $("#recensioni-da-fare").on("click","span",function() {
         console.log("stella cliccata");
         var list = $(this).parent().children("span");
         var c = $(this).attr("class");
@@ -674,6 +666,7 @@ function eventsHandler(){
     
         r.done(function(msg){
             $(t).parent().parent().parent().remove();
+            offerteInCuiUtentePresente[msg.id].ospitato = ospitato;
             aggiungiNotifica(nuovaNotificaMessaggio("L'offerta è stata confermata"),"successo");
             creaBoxOffertaAccettata(msg.id,offerteInCuiUtentePresente[msg.id],"Ospitante");
             creaBoxRecensioneDaFare(msg.id,offerteInCuiUtentePresente[msg.id],"Ospitante");
@@ -796,7 +789,7 @@ function eventsHandler(){
     //--------------------------------------------------------------------------------------------
 
     //Quando clicco su un utente mi appaiono le informazioni
-    $(".utente-info").click(function(){
+    $("body").on("click",".utente-info", function(){
         var username = $(this).text();
         console.log(username);
 
@@ -930,12 +923,13 @@ $(document).ready(function(){
                 var not = nuovaNotifica("",partita,username + " ti ha inviato un messaggio");
                 aggiungiNotifica(not);
             }
-            else if($("#" + id + "-chat").css("display") === "none"){
+            else if($("#" + id + "-chat").css("display") === "none" || $("#messaggiPage").css("display") === "none"){
                 inserisciMessaggio(id,msg.messaggio,ruolo);
                 var not = nuovaNotifica("",partita,username + " ti ha inviato un messaggio");
                 aggiungiNotifica(not);
                 var box = document.getElementById(id + "-chat");
                 box.scrollTop = box.scrollHeight;
+
             }
             else if($("#" + id + "-chat").length !== 0){
                 inserisciMessaggio(id,msg.messaggio,ruolo);
