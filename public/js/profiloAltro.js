@@ -6,7 +6,9 @@ function scegliPersonaAltra(nome, cognome, squadra, numOfferte, numVolteOspitato
     document.getElementById("numOfferteProfiloAltro").innerHTML = numOfferte;
     document.getElementById("numVolteOspitatoProfiloAltro").innerHTML = numVolteOspitato;
 
-    $("#mediaRecensioniProfiloAltro").empty();
+    $("#mediaRecensioniProfiloAltro").children("span").remove();
+    $("#mediaRecensioniProfiloAltro").children("br").remove();
+
     $(creaStelle(mediaRec)).appendTo("#mediaRecensioniProfiloAltro");
 }
 

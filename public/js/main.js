@@ -204,7 +204,7 @@ function creaStelle(val){
 
 //Mette quante offerte hai fatto e la media delle recensioni nel tuo profilo
 function getInfoRecensioniPerProfilo(id,li){
-    var listaContatori= [0,0,1]; //[numOfferte, numVolteOspitato, mediaRecensioni]
+    var listaContatori= [0,0,0]; //[numOfferte, numVolteOspitato, mediaRecensioni]
     var listaEventi = li;
     var contatore = 0;
     var somma = 0;
@@ -254,9 +254,16 @@ function getSquadre(){
     });
 
     request.done(function(msg) {
-        setSquadre(msg.teams);
-        getSquadreHome();
-        iniziaProgramma();
+        if(msg.errore){
+            $("#schermata-caricamento").empty();
+            var toAppend = "<div>Non è possibile scaricare i dati delle partite</div>";
+            $(toAppend).appendTo("#schermata-caricamento");
+        }
+        else{
+            setSquadre(msg.teams);
+            getSquadreHome();
+            iniziaProgramma();
+        }
     });
 
     request.fail(function(msg) {
@@ -297,8 +304,15 @@ function getPartite(){
     });
 
     request.done(function(msg) {
-        setPartite(msg.matches);
-        iniziaProgramma();
+        if(msg.errore){
+            $("#schermata-caricamento").empty();
+            var toAppend = "<div>Non è possibile scaricare i dati delle partite</div>";
+            $(toAppend).appendTo("#schermata-caricamento");
+        }
+        else{
+            setPartite(msg.matches);
+            iniziaProgramma();
+        }
     });
 
     request.fail(function(msg) {
@@ -422,7 +436,7 @@ function inserisciOspitiDaAccettare(listaOfferte){
 function creaWrapperPerOfferta(offerta){
     var nuovaOfferta = $(".div-offerta-da-accettare:first").clone();
     nuovaOfferta.children(".offerta-da-accettare-partita").text(stringPartita(offerta.homeTeam,offerta.awayTeam));
-    nuovaOfferta.children(".offerta-da-accettare-id").val(offerta._id);
+    nuovaOfferta.children(".offerta-da-accettare-id").val(offerta._id + "-offerta-da-accettare");
     //nuovaOfferta.children(".offerta-da-accettare-ospiti").text("Non ci sono richieste");
     creaBoxRichiesta(nuovaOfferta,offerta._id,offerta.codaRichieste);
     $(nuovaOfferta).appendTo("#ospiti-da-accettare");
@@ -482,7 +496,7 @@ function creaBoxRecensioneDaFare(id,recensione,ifOspitato){
 
     var nuovaRecensione = $(".div-recensione:first").clone();
     nuovaRecensione.children(".recensione-da-fare-partita").text(stringPartita(recensione.homeTeam,recensione.awayTeam));
-    nuovaRecensione.children(".recensione-da-fare-id").val(recensione._id);
+    nuovaRecensione.children(".recensione-da-fare-id").val(recensione._id + "-recensione-da-fare");
     if(ifOspitato === "Ospitante"){
         nuovaRecensione.children(".recensione-da-fare-tipologia").text("Hai ospitato:");
     }
@@ -526,7 +540,7 @@ function creaBoxOffertaAccettata(id,offerta,ifOspitato){
 
     var nuovaOffertaAccettata = $(".div-offerta-accettata:first").clone();
     nuovaOffertaAccettata.children(".offerta-accettata-partita").text(stringPartita(offerta.homeTeam,offerta.awayTeam));
-    nuovaOffertaAccettata.children(".offerta-accettata-id").val(offerta._id);
+    nuovaOffertaAccettata.children(".offerta-accettata-id").val(offerta._id + "-offerta-accettata");
     if(ifOspitato === "Ospitante"){
         nuovaOffertaAccettata.children(".offerta-accettata-tipologia").text("Hai ospitato:");
     }
@@ -552,7 +566,7 @@ function polling(){
         setTimeout(function(){
             controllaCambiamenti(msg.rows);
             polling();
-        }, 3000);
+        }, 2000);
     });
 
     r.fail(function(err){
@@ -608,9 +622,9 @@ function controllaCambiamenti(listaOfferte){
             for(var j=oldLen;j < newLen;j++){
                 offerteInCuiUtentePresente[offerta._id].codaRichieste.push(offerta.codaRichieste[j]);
                 if(oldLen === 0){
-                    $("input[value=" + offerta._id + "]").siblings(".offerta-da-accettare-ospiti").empty();
+                    $("input[value=" + offerta._id + "-offerta-da-accettare]").siblings(".offerta-da-accettare-ospiti").empty();
                 }
-                var boxRichieste = $("input[value=" + offerta._id + "]").siblings(".offerta-da-accettare-ospiti");
+                var boxRichieste = $("input[value=" + offerta._id + "-offerta-da-accettare]").siblings(".offerta-da-accettare-ospiti");
                 inserisciRichiesta(boxRichieste,offerta._id,offerta.codaRichieste[j]);
                 //Notifico l'aggiornamento
                 var n = nuovaNotifica("",stringPartita(offerta.homeTeam,offerta.awayTeam),offerta.codaRichieste[j] + " ha fatto una richiesta");
@@ -655,13 +669,15 @@ function eventsHandler(){
     $("#ospiti-da-accettare").on("click",".bt-ospita",function(){
         var t = this;
         var id = $(t).parent().parent().siblings(".offerta-da-accettare-id").val();
+        id = id.substring(0,id.length - "-offerta-da-accettare".length);
+        console.log("id: " + id);
         var ospitato = $(t).siblings("label").text();
 
         var r = $.ajax({
             type: "POST",
             url: "/confermaRichiesta",
             dataType: "json",
-            data: {"id":id,"ospitato":ospitato} //localStorage.utente.username
+            data: {"id":id,"ospitato":ospitato}
         });
     
         r.done(function(msg){
@@ -690,16 +706,19 @@ function eventsHandler(){
     $("#recensioni-da-fare").on("click","#button-inserisci-recensione",function(){
         var t = this;
         var id = $(t).siblings("input[type=hidden]").val();
+        console.log(id);
+        id = id.substring(0,id.length - "-recensioni-da-fare".length);
+        console.log("id: " + id);
 
         //var persona = $(t).siblings(".recensione-da-fare-altro").text();
         var titolo = $(t).siblings(".recensione-da-fare-testo").children("input[type=text]").val();
         var stelle = $(t).siblings(".contenitore-stelle").children("input[type=hidden]").val();
         var params = {"id":id,"recensione": {"titolo":titolo,"numstelle":stelle}};
-        if($(t).siblings(".recensione-da-fare-tipologia").text() === "Ospitato"){
-            params.ruolo = "ospitato";
+        if($(t).siblings(".recensione-da-fare-tipologia").text() === "Hai ospitato:"){
+            params.ruolo = "ospitatante";
         }
         else{
-            params.ruolo = "ospitante";
+            params.ruolo = "ospitato";
         }
 
         console.log(JSON.stringify(params));
@@ -736,7 +755,7 @@ function eventsHandler(){
             return;
         }
         else if(awayTeam === "null"){
-            aggiungiNotifica(nuovaNotificaMessaggio("La squadra in trasferta deve essere selzionata","errore"));
+            aggiungiNotifica(nuovaNotificaMessaggio("La squadra in trasferta deve essere selezionata","errore"));
             return;
         }
 
@@ -813,74 +832,6 @@ function eventsHandler(){
          })
      
     })
-
-
-    //All'inizio carico tutti i documenti
-
-    //home
-    /*$("#homePage").load("homepage.html", function(){
-        console.log("main caricato");
-    });*/
-    /*var request = $.ajax({
-        url: "http://127.0.0.1:8888/utente/homepage.html",
-        dataType: "html",
-        type: "GET"
-    });
-
-    request.done(function(msg) {
-        $("#homePage").html(msg);
-    });
-
-    request.fail(function(err) {
-        alert("no home");
-    });
-
-    //cerca
-    $("#cercaPage").load("index.html"); 
-    /*request = $.ajax({
-        url: "http://127.0.0.1:8888/utente/index.html",
-        dataType: "html",
-        type: "GET"
-    });
-
-    request.done(function(msg) {
-        $("#cercaPage").html(msg);
-    });
-
-    request.fail(function(msg) {
-        alert("no cerca");
-    });
-
-    //mio profilo
-    $("#profiloPage").load("profilo.html");
-
-    //profilo di altri utenti
-    $("#utentePage").load("utente.html");
-
-    //messaggi
-    $("#messaggiPage").load("messaggi.html"); 
-
-    //-------------------------------------------------------------------------------------
-
-    //Carico tutte le offerte dell'utente nel localStorage
-    var r = $.ajax({
-        type: "POST",
-        url: "http://127.0.0.1:8888/utente/loadOfferte",
-        dataType: "json",
-        data: {"username":"pippo"} //localStorage.utente.username
-    });
-
-    r.done(function(msg){
-        for(var i=0;i < msg.length;i++){
-            aggiungiSelezioneOspiti(msg[i].value);
-            creaAggiungiRecensione(msg[i].value);
-        }
-        polling();
-    });
-
-    r.fail(function(err){
-        alert(JSON.stringify(err));
-    });*/
 
     //-------------------------------------------------------------------------------------
 

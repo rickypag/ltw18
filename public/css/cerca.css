@@ -47,4 +47,16 @@
     padding-top: 5px
 }
 
+.utente-info{
+    font-size: 27px;
+    font-style: normal;
+    cursor: pointer;
+    text-transform: none;
+
+}
+
+.utente-info:hover{
+    color: white;
+}
+
 

@@ -40,7 +40,7 @@ body {
 .form-signin .form-control:focus {
   z-index: 2;
 }
-.form-signin input[type="email"] {
+.form-signin input[type="text"] {
   margin-bottom: -1px;
   border-bottom-right-radius: 0;
   border-bottom-left-radius: 0;
@@ -51,6 +51,6 @@ body {
   border-top-right-radius: 0;
 }
 
-.myForm .fail {
-  background-color: rgba(255, 85, 85, 0.300);
+.form-signin.fail {
+  background-color: rgba(255, 85, 85, 0.800);
 }

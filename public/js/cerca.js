@@ -119,7 +119,7 @@ function creaOfferta(homeTeam,awayTeam,offerenti) {
             var wrapper = '<form class="box-offerta">\
                                 <div class="info-offerta">\
                                     <div>\
-                                        <a class="link-profilo">' + o.ospitante + '</a>\
+                                        <label class="utente-info">' + o.ospitante + '</label>\
                                     </div>\
                                     <label>' + homeTeam + ' - ' + awayTeam + '</label>\
                                     <a class="button upload-offerta offerta-cerca">Richiedi</a>\

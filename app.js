@@ -153,46 +153,6 @@ io.on('connection', function(socket){
 });
 
 
- /*
-app.ws('/messaggi', function(ws, req) {
-    console.log(req.session.username);
-
-    ws.on('message', function(msg) {
-        console.log("[*]" + JSON.stringify(msg));
-        console.log("[*]" + JSON.stringify(ws));
-        //ws.send(msg);
-
-        var mex = msg.messaggio;
-        var id = msg.id;
-
-        
-        offerte.view('offerteView', 'getDocById', {keys: [id]}).then((response) => {
-            console.log("response: " + JSON.stringify(response.rows[0].value));
-
-            var oldDoc = response.rows[0].value;
-            console.log("oldDoc: " + JSON.stringify(oldDoc));
-
-            if(ruolo === "ospite") oldDoc["recensioneFattaDaOspite"] = recensione;//{"titolo":recensione,"numStelle":numStelle};
-            else oldDoc["recensioneFattaDaOspitante"] = recensione;//{"titolo":recensione,"numStelle":numStelle};
-            
-            console.log("newDoc: " + JSON.stringify(oldDoc));
-
-            offerte.insert(oldDoc).then((response) => {
-                console.log(response);
-                res.send({"message":"ok"});
-            }).catch((err) => {
-                console.log(err);
-                res.send({"message":"error"});
-            });
-        }).catch((err) => {
-            console.log(err);
-            res.send("Errore Database!");
-        });
-    });
-
-});*/
-
-
 //--------------------------------------------------------------------------------------------
 
 //FILE
@@ -652,6 +612,10 @@ app.get('/teams', function(req, res){
         var info = JSON.parse(body);
         res.send(info);
       }
+      else{
+        console.log(error);
+         res.send({"errore":"err"});
+      }
     })
   });
   
@@ -662,6 +626,10 @@ app.get('/matches', function(req, res){
         var info = JSON.parse(body);
         res.send(info);
       }
+      else{
+        console.log(error);
+        res.send({"errore":"errs"});
+      }      
     })
   });
 
