@@ -1,0 +1,15 @@
+{
+  "name": "foo",
+  "dependencies": {
+    "body-parser": "^1.18.2",
+    "express": "^4.16.4",
+    "express-session": "^1.15.6",
+    "http": "0.0.0",
+    "nano": "^7.1.1",
+    "request": "^2.88.0",
+    "socket.io": "^2.2.0"
+  },
+  "scripts": {
+    "start": "node app.js"
+  }
+}
