@@ -2,54 +2,55 @@
  * Il server è un semplice servizio che fornisce delle API per connettersi al database
  * -OSS
  *  Solo gli utenti registrati possono accedere al database
- * 
+ *
  * -API
  * 1)Ogni utente può vedere tutte le informazioni degli altri utenti (eccetto la password):
  *    GET /utente con data = {"username":"X"} ritorna le informazioni di quell'utente
- * 
+ *
  * 2) GET /caricaOfferte con data = {"homeTeam":"X","awayTeam":"Y"} ritorna tutte le offerte fatte
  *                       da qualsiasi utente per la partita 'homeTeam - awayTeam'
- * 
+ *
  * 3) GET /myOfferte ritorna tutte le offerte fatte dall'utente che le richiede (si vede dalla connessione/cookie)
  *                   e quelle in cui è ospitato, oppure dell'utente della query se è presente
- * 
+ *
  * 4) POST /aggiungiOfferta con data = {"homeTeam":"X","awayTeam":"Y"} crea una nuova offerta dell'utente che
  *                        la fa e ritorna l'id della nuova offerta
- * 
+ *
  * 5) POST /inviaRichiesta con data = {"id": "X"} aggiunge l'utente che ha fatto richiesta alla codaRichieste
  *                         dell'offerta con id "X"
- * 
- * 6) POST /confermaRichiesta con data = {"id": "X","ospite":"Y"} mette come ospite dell'offerta "X" 
+ *
+ * 6) POST /confermaRichiesta con data = {"id": "X","ospite":"Y"} mette come ospite dell'offerta "X"
  *                            l'utente "Y"
- * 
- * 7) POST /inviaRecensione con data = {"id": "X","recensione":"Y","ruolo":"Z"} inserisce nell'offerta "X" 
+ *
+ * 7) POST /inviaRecensione con data = {"id": "X","recensione":"Y","ruolo":"Z"} inserisce nell'offerta "X"
  *                          la recensione "Y" nel ruolo di "Z"
- * 
+ *
  * 8) POST /getMessaggi con data = {"id": "X","min":Y,"max":Z} ritorna i messaggi relativi a un'offerta Y
  *                        dal numero min al numero max
- * 
+ *
  * 9) POST /aggiornaProfilo con data = {"nome": "X","cognome":Y,"squadra":Z} aggiorna il profilo dell'utente
- * 
+ *
  *********************************************************************************************************************/
 
 var express = require('express');
 var session = require('express-session');
 var bodyParser = require("body-parser");
-var nano = require('nano')('http://localhost:5984');
+//var nano = require('nano')('http://127.0.0.1:5986');
+var nano = require('nano')('http://couchdb:5984');
 var request = require('request');
 
 var myHeader =  { 'X-Auth-Token': '9d86980a76af481d8388321e25ab6dd0' };
 
 var utenti = nano.db.use('utenti');
 var offerte = nano.db.use('offerte');
- 
+
 var app = express();
 //var expressWs = require('express-ws')(app);
 
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
 
-var _dir = 'C:\\Users\\HP\\Desktop\\progetto_new';
+var _dir = '/home/node';
 express.static(_dir);
 var sessionMiddleware = session({
     key: 'user_sid',
@@ -76,7 +77,7 @@ app.use(sessionMiddleware);
 
 var sess;
 
-/*************************************************************************************** 
+/***************************************************************************************
  * WEB SOCKET                                                                          *
  ***************************************************************************************/
 
@@ -96,65 +97,58 @@ io.on('connection', function(socket){
             }
         }
 
-    }).catch((err) => {
-        console.log(err);
-    });
+        socket.on("messaggio",function(msg) {
+            console.log("[*] Messaggio: " + JSON.stringify(msg));
+            var id = msg.id;
+            var testo = msg.testo;
+            var ruolo = msg.ruolo;
+            var mittente = socket.request.session.username;
+            var partita = msg.partita;
 
-    //Creo una chat tra i due utenti anche quando si è appena creata un'offerta
-    socket.on("nuovaChat",function(msg) {
-        socket.join(JSON.stringify(msg.id));
-        console.log("[*] Join su offerta " + msg.id);
-    });
-    
-    socket.on("messaggio",function(msg) {
-        console.log("[*] Messaggio: " + JSON.stringify(msg));
-        var id = msg.id;
-        var testo = msg.testo;
-        var ruolo = msg.ruolo;
-        var mittente = socket.request.session.username;
-        var partita = msg.partita;
-
-        var toSend = {
-            "id":id,
-            "messaggio": {
-                "testo": testo
-            },
-            "mittente": mittente,
-            "ruolo": ruolo,
-            "partita": partita
-        };
-
-        //Quando ricevo un messaggio faccio broadcast
-        socket.broadcast.to(JSON.stringify(id)).emit('messaggio',toSend);
-        console.log("[*] Messaggio inviato");
-
-        //E poi lo metto nella coda
-        offerte.view('offerteView', 'getDocById', {keys: [id]}).then((response) => {
-            console.log("response: " + JSON.stringify(response.rows[0].value));
-
-            var oldDoc = response.rows[0].value;
-
-            var toInsert = {
-                "mittente": (mittente === oldDoc.ospitato)?"Ospitato":"Ospitante",
-                "testo": testo
+            var toSend = {
+                "id":id,
+                "messaggio": {
+                    "testo": testo
+                },
+                "mittente": mittente,
+                "ruolo": ruolo,
+                "partita": partita
             };
 
-            console.log("oldDoc: " + JSON.stringify(oldDoc));
-           
-            oldDoc.messaggi.push(toInsert);
-            
-            console.log("newDoc: " + JSON.stringify(oldDoc));
+            //Quando ricevo un messaggio faccio broadcast
+            socket.broadcast.to(JSON.stringify(id)).emit('messaggio',toSend);
+            console.log("[*] Messaggio inviato");
 
-            offerte.insert(oldDoc).then((response) => {
-                console.log(response);
+            //E poi lo metto nella coda
+            offerte.view('offerteView', 'getDocById', {keys: [id]}).then((response) => {
+                console.log("response: " + JSON.stringify(response.rows[0].value));
+
+                var oldDoc = response.rows[0].value;
+
+                var toInsert = {
+                    "mittente": (mittente === oldDoc.ospitato)?"Ospitato":"Ospitante",
+                    "testo": testo
+                };
+
+                console.log("oldDoc: " + JSON.stringify(oldDoc));
+
+                oldDoc.messaggi.push(toInsert);
+
+                console.log("newDoc: " + JSON.stringify(oldDoc));
+
+                offerte.insert(oldDoc).then((response) => {
+                    console.log(response);
+                }).catch((err) => {
+                    console.log(err);
+                });
             }).catch((err) => {
                 console.log(err);
+                res.send("Errore Database!");
             });
-        }).catch((err) => {
-            console.log(err);
-            res.send("Errore Database!");
-        });
 
+        });
+    }).catch((err) => {
+        console.log(err);
     });
 
 });
@@ -180,7 +174,7 @@ app.get('/utente/*', function(req,res){
 app.get('/login', function(req,res){
     sess = req.session;
     if(!sess.username){
-        res.sendFile(_dir + '\\login.html');
+        res.sendFile(_dir + '/login.html');
     }
     else{
         res.redirect("/utente/main.html");
@@ -190,7 +184,7 @@ app.get('/login', function(req,res){
 app.get('/signup', function(req,res){
     sess = req.session;
     if(!sess.username){
-        res.sendFile(_dir + '\\signup.html');
+        res.sendFile(_dir + '/signup.html');
     }
     else{
         res.redirect("/utente/main.html");
@@ -210,7 +204,7 @@ app.post('/login', function(req,res){
         utenti.view('tmp', 'login', {keys: [[username, password]]}).then((response) => {
             console.log(response);
             if(response.rows.length > 0){
-                console.log("[*] L'autenticazione è andata a buon fine");          
+                console.log("[*] L'autenticazione è andata a buon fine");
                 sess = req.session;
                 sess.username = username;
                 res.send('<html><script>var u = {\
@@ -256,12 +250,13 @@ app.post('/signup', function(req,res){
                         dataNascita: req.body.dataNascita,
                         squadra: ""
                     };
-                    
+
                     if(req.body.sesso){
                         data.sesso = req.body.sesso;
                     }
-            
+
                     utenti.insert(data).then((response) => {
+                        console.log("[*]" + req.body.username + " si è registrato");
                         res.redirect("/login");
                     }).catch((err) => {
                         console.log(err);
@@ -374,11 +369,11 @@ app.post("/aggiungiOfferta", function(req,res){
     if(sess.username){
         console.log("[*] L'utente " + "pippo" + " sta inserendo " + req.body.homeTeam + " - " + req.body.awayTeam);
         //var r = view(offerte,"offerteView","myOfferte",["pippo"]);
-        
+
         var homeTeam = req.body.homeTeam;
         var awayTeam = req.body.awayTeam;
         var username = sess.username;
-        
+
         var data = {
             homeTeam: homeTeam,
             awayTeam: awayTeam,
@@ -419,7 +414,7 @@ app.post("/inviaRichiesta", function(req,res){
 
         var ospite = sess.username;
         var id = req.body.id;
-        
+
         offerte.view('offerteView', 'getDocById', {keys: [id]}).then((response) => {
             console.log("response: " + JSON.stringify(response));
 
@@ -446,7 +441,7 @@ app.post("/inviaRichiesta", function(req,res){
     }
 });
 
-//6) POST /confermaRichiesta con data = {"id": "X","ospite":"Y"} mette come ospite dell'offerta "X" 
+//6) POST /confermaRichiesta con data = {"id": "X","ospite":"Y"} mette come ospite dell'offerta "X"
 //                           l'utente "Y"
 app.post("/confermaRichiesta", function(req,res){
     sess = req.session;
@@ -457,7 +452,7 @@ app.post("/confermaRichiesta", function(req,res){
         var ospitato = req.body.ospitato;
         var id = req.body.id;
 
-        
+
         offerte.view('offerteView', 'getDocById', {keys: [id]}).then((response) => {
             console.log("response: " + JSON.stringify(response));
 
@@ -485,7 +480,7 @@ app.post("/confermaRichiesta", function(req,res){
     }
 });
 
-//7) POST /inviaRecensione con data = {"id": "X","recensione":"Y","ruolo":"Z"} inserisce nell'offerta "X" 
+//7) POST /inviaRecensione con data = {"id": "X","recensione":"Y","ruolo":"Z"} inserisce nell'offerta "X"
 //                         la recensione "Y" nel ruolo di "Z"
 app.post("/inviaRecensione", function(req,res){
     sess = req.session;
@@ -497,7 +492,7 @@ app.post("/inviaRecensione", function(req,res){
         var id = req.body.id;
         var recensione = req.body.recensione;
 
-        
+
         offerte.view('offerteView', 'getDocById', {keys: [id]}).then((response) => {
             console.log("response: " + JSON.stringify(response.rows[0].value));
 
@@ -506,7 +501,7 @@ app.post("/inviaRecensione", function(req,res){
 
             if(ruolo === "ospitato") oldDoc["recensioneFattaDaOspitato"] = recensione;//{"titolo":recensione,"numStelle":numStelle};
             else oldDoc["recensioneFattaDaOspitante"] = recensione;//{"titolo":recensione,"numStelle":numStelle};
-            
+
             console.log("newDoc: " + JSON.stringify(oldDoc));
 
             offerte.insert(oldDoc).then((response) => {
@@ -538,7 +533,7 @@ app.post("/getMessaggi",function(req,res) {
         var min = req.body.min;
         var max = req.body.max;
 
-        
+
         offerte.view('offerteView', 'getDocById', {keys: [id]}).then((response) => {
             console.log("response: " + JSON.stringify(response.rows[0].value));
             var doc = response.rows[0].value;
@@ -571,7 +566,7 @@ app.post("/aggiornaProfilo", function(req,res){
 
         var errore = '<html><script>window.location.replace("/utente/main.html");</script></html>'
 
-        
+
         utenti.view("tmp", "utente", {keys: [username]}).then((response) => {
             console.log("response: " + JSON.stringify(response.rows[0].value));
 
@@ -625,7 +620,7 @@ app.get('/teams', function(req, res){
       }
     })
   });
-  
+
 //Ritorno le squadre partecipanti
 app.get('/matches', function(req, res){
     request({headers: myHeader,uri:'https://api.football-data.org/v2/competitions/CL/matches',method:'GET'}, function (error, response, body) {
@@ -636,9 +631,11 @@ app.get('/matches', function(req, res){
       else{
         console.log(error);
         res.send({"errore":"errs"});
-      }      
+      }
     })
   });
+
+
 
 http.listen(8888, function(){
     console.log("[*] Server in ascolto sulla porta 8888");

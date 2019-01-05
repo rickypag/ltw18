@@ -1,4 +1,17 @@
 var idChatSelected = null;
+/*
+var ws = new WebSocket('ws://127.0.0.1:8888/messaggi');
+
+// event emmited when connected
+ws.onopen = function () {
+    console.log('websocket is connected ...');
+}
+
+// event emmited when receiving message 
+ws.onmessage = function (ev) {
+    console.log(ev);
+}
+*/
 
 //--------------------------------------------------------------------------------------------
 
@@ -23,7 +36,6 @@ function changeChat(id){
 function popolaSideBar(){
     for(var key in offerteInCuiUtentePresente){
         var offerta = offerteInCuiUtentePresente[key];
-        console.log(offerta.ospitato);
         if(offerta.ospitato){
             $(creaSidebarEntry(offerta)).appendTo(".sidenav");
         }
