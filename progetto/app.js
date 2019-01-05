@@ -180,7 +180,7 @@ app.get('/utente/*', function(req,res){
 app.get('/login', function(req,res){
     sess = req.session;
     if(!sess.username){
-        res.sendFile(_dir + '\\login.html');
+        res.sendFile(_dir + '/login.html');
     }
     else{
         res.redirect("/utente/main.html");
@@ -190,7 +190,7 @@ app.get('/login', function(req,res){
 app.get('/signup', function(req,res){
     sess = req.session;
     if(!sess.username){
-        res.sendFile(_dir + '\\signup.html');
+        res.sendFile(_dir + '/signup.html');
     }
     else{
         res.redirect("/utente/main.html");
