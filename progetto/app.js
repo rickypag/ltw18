@@ -35,7 +35,7 @@
 var express = require('express');
 var session = require('express-session');
 var bodyParser = require("body-parser");
-var nano = require('nano')('http://localhost:5984');
+var nano = require('nano')('http://couchdb:5984');
 var request = require('request');
 
 var myHeader =  { 'X-Auth-Token': '9d86980a76af481d8388321e25ab6dd0' };
@@ -49,7 +49,7 @@ var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
 
-var _dir = 'C:\\Users\\HP\\Desktop\\progetto_new';
+var _dir = '/home/node';
 express.static(_dir);
 var sessionMiddleware = session({
     key: 'user_sid',
