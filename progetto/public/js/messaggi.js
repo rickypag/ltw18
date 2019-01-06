@@ -23,7 +23,6 @@ function changeChat(id){
 function popolaSideBar(){
     for(var key in offerteInCuiUtentePresente){
         var offerta = offerteInCuiUtentePresente[key];
-        console.log(offerta.ospitato);
         if(offerta.ospitato){
             $(creaSidebarEntry(offerta)).appendTo(".sidenav");
         }
@@ -96,7 +95,6 @@ function getMessaggiById(id,ruolo){
  ***************************************************************************************/
 
 popolaSideBar();
-var socket = io();
 
 $(".invia-messaggio a").click(function(){
     var testo = $(".invia-messaggio [name=messaggio]").val();
@@ -107,7 +105,6 @@ $(".invia-messaggio a").click(function(){
         var messaggio = {"mittente":ruolo,"testo":testo}
         $(".invia-messaggio [name=messaggio]").val("");
         //Invio il messaggio sul socket
-        console.log(id);
         socket.emit('messaggio', {"id":id,"testo":testo,"ruolo":ruolo,"partita":partita});
         //E lo stampo a video
         inserisciMessaggio(id,messaggio,ruolo);
@@ -129,8 +126,7 @@ $(".sidenav").on("click",".sidenav-entry",function(){
     $(this).css("background-color","yellow");
     var id = $(this).children("[type=hidden]").val();
     var ruolo = $(this).children(".ruolo").text();
-    console.log(id);
-    if(!$("#" + id + "hat").length){
+    if(!$("#" + id + "-chat").length){
         $(creaBoxMessaggi(id)).appendTo(".div-box-messaggi");
         getMessaggiById(id,ruolo);
     }

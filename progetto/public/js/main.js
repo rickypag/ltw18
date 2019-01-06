@@ -156,7 +156,6 @@ function appendRecensioni(type, tipoProfilo){
     if(type === 'Ospitato'){
         for(var i=1; i<lis.length; i++){
             if(lis[i].recensioneFattaDaOspitante && lis[i].ospitato == username){
-                console.log(tipoProfilo);
                 $(creaRecensione(lis[i].recensioneFattaDaOspitante, lis[i].ospitante)).appendTo('.OspitatoProfilo' + tipoProfilo);
             }
         }
@@ -164,7 +163,6 @@ function appendRecensioni(type, tipoProfilo){
     else if(type === 'Ospitante'){
         for(var i=1; i<lis.length; i++){
             if(lis[i].recensioneFattaDaOspitato && lis[i].ospitante == username){
-                console.log(tipoProfilo);
                 $(creaRecensione(lis[i].recensioneFattaDaOspitato, lis[i].ospitato)).appendTo('.OspitanteProfilo' + tipoProfilo);
             }
         }
@@ -275,7 +273,6 @@ function setSquadre(t) {
             "shortName": teams[i].shortName.toLowerCase()
         };
     }
-    console.log("Squadre caricate (" + Object.keys(teamsIdByShortName).length + "," + Object.keys(teamsIdByShortName).length + ")");
 }
 
 //-------------------------------------------------------------------------------------
@@ -329,7 +326,6 @@ function caricaMain(){
     });
 
     request.done(function(msg){
-        console.log("Msg: " + JSON.stringify(msg.rows));
         inserisciOspitiDaAccettare(msg.rows);
         inserisciRecensioneDaFare(msg.rows);
         inserisciOfferteAccettate(msg.rows);
@@ -353,7 +349,6 @@ function caricaMain(){
 //Dopo aver caricato le squadre le metto nel menu a tendina
 function getSquadreHome(){
     var lista = Object.keys(teamsIdByShortName);
-    console.log("len: " + lista.length);
     var x = document.getElementById("selPartitaHome");
     for(var i=0; i < lista.length; i++){
         var option = document.createElement("option");
@@ -367,14 +362,12 @@ function getSquadreHome(){
 //E la squadra in trasferta la metto a seconda della partita
 function getSquadreAway(sq){
     var lista = matches;
-    console.log(JSON.stringify(matches));
     var x = document.getElementById("selPartitaAway");
     var optionNull = document.createElement("option");
             optionNull.text = "---";
             optionNull.value = "null";
             x.add(optionNull);
     for(var i=0; i < lista.length; i++){
-        console.log(sq);
         if(lista[i].homeTeam == sq){
             var option = document.createElement("option");
             option.text = lista[i].awayTeam;
@@ -477,7 +470,6 @@ function creaBoxRecensioneDaFare(id,recensione,ifOspitato){
     if(ifOspitato === "Ospitato") altroUtente = recensione.ospitante;
     else altroUtente = recensione.ospitato;
 
-    console.log(altroUtente);
 
     var nuovaRecensione = $(".div-recensione:first").clone();
     nuovaRecensione.children(".recensione-da-fare-partita").text(stringPartita(recensione.homeTeam,recensione.awayTeam));
@@ -578,13 +570,16 @@ function controllaCambiamenti(listaOfferte){
                 //Creo la chat
                 socket.emit("nuovaChat", {"id":offerta._id});
 
+                if($("#messaggiPage").length){
+                    $(creaSidebarEntry(offerta)).appendTo(".sidenav");
+                }
+
                 //Notifico l'aggiornamento
                 var n = nuovaNotifica("",stringPartita(offerta.homeTeam,offerta.awayTeam),offerta.ospitante + " ha accettato di ospitarti");
                 aggiungiNotifica(n);
 
                 n = nuovaNotifica("recensione-not",stringPartita(offerta.homeTeam,offerta.awayTeam),"Scrivi una recensione su " + offerta.ospitante + " per sapere agli altri come ti sei trovato");
                 aggiungiNotifica(n);
-                console.log("Notifica: " + offerta._id);
 
                 creaBoxOffertaAccettata(offerta._id,offerta,"Ospitato");
                 creaBoxRecensioneDaFare(offerta._id,offerta,"Ospitato");
@@ -644,7 +639,6 @@ function eventsHandler(){
     
     //Quando clicco una stella evidenzio le stelle per quella recensione
     $("#recensioni-da-fare").on("click","span",function() {
-        console.log("stella cliccata");
         var list = $(this).parent().children("span");
         var c = $(this).attr("class");
         var value = parseInt(c[c.length-1]) + 1;
@@ -660,7 +654,6 @@ function eventsHandler(){
         var t = this;
         var id = $(t).parent().parent().siblings(".offerta-da-accettare-id").val();
         id = id.substring(0,id.length - "-offerta-da-accettare".length);
-        console.log("id: " + id);
         var ospitato = $(t).siblings("label").text();
 
         var r = $.ajax({
@@ -683,7 +676,6 @@ function eventsHandler(){
             socket.emit("nuovaChat", {"id":msg.id});
 
             if($("#messaggiPage").length){
-                console.log("Inserisco il box");
                 $(creaSidebarEntry(offerteInCuiUtentePresente[msg.id])).appendTo(".sidenav");
 
             }
@@ -701,9 +693,7 @@ function eventsHandler(){
     $("#recensioni-da-fare").on("click","#button-inserisci-recensione",function(){
         var t = this;
         var id = $(t).siblings("input[type=hidden]").val();
-        console.log(id);
         id = id.substring(0,id.length - "-recensioni-da-fare".length);
-        console.log("id: " + id);
 
         //var persona = $(t).siblings(".recensione-da-fare-altro").text();
         var titolo = $(t).siblings(".recensione-da-fare-testo").children("input[type=text]").val();
@@ -715,8 +705,6 @@ function eventsHandler(){
         else{
             params.ruolo = "ospitato";
         }
-
-        console.log(JSON.stringify(params));
 
         var r = $.ajax({
             type: "POST",
@@ -744,7 +732,6 @@ function eventsHandler(){
 
         var homeTeam = $("#nuova-offerta select[name=selPartitaHome]").val();
         var awayTeam = $("#nuova-offerta select[name=selPartitaAway]").val();
-        console.log(stringPartita(homeTeam,awayTeam));
         if(homeTeam === "null"){
             aggiungiNotifica(nuovaNotificaMessaggio("La squadra di casa deve essere selezionata","errore"));
             return;
@@ -805,7 +792,6 @@ function eventsHandler(){
     //Quando clicco su un utente mi appaiono le informazioni
     $("body").on("click",".utente-info", function(){
         var username = $(this).text();
-        console.log(username);
 
         var c = $.ajax({
             type: "GET",
@@ -877,7 +863,6 @@ $(document).ready(function(){
             else if($("#" + id + "-chat").length !== 0){
                 inserisciMessaggio(id,msg.messaggio,ruolo);
                 var box = document.getElementById(id + "-chat");
-                console.log(box.innerHTML);
                 box.scrollTop = box.scrollHeight;
             }
         }
